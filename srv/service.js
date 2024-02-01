@@ -29,8 +29,7 @@ class Service extends cds.ApplicationService {
       definitions[currentEntity].associations[associationName];
 
     // TODO: Test if propper key
-    const key = association.keys[0].ref[0];
-    const associationKey = association.keys[0].$generatedFieldName;
+
 
     const expandEntityName = association.target;
     const entity = definitions[expandEntityName];
@@ -43,6 +42,8 @@ class Service extends cds.ApplicationService {
     if (!isFromRemote) {
       return undefined;
     }
+    const key = association.keys[0].ref[0];
+    const associationKey = association.keys[0].$generatedFieldName;
     const service = entitySchema.projection.from.ref[0].split(".")[0];
     return {
       associationName: associationName,
