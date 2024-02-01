@@ -28,9 +28,6 @@ class Service extends cds.ApplicationService {
     const association =
       definitions[currentEntity].associations[associationName];
 
-    // TODO: Test if propper key
-
-
     const expandEntityName = association.target;
     const entity = definitions[expandEntityName];
 
@@ -42,6 +39,7 @@ class Service extends cds.ApplicationService {
     if (!isFromRemote) {
       return undefined;
     }
+    // TODO: Test if propper key & multi key
     const key = association.keys[0].ref[0];
     const associationKey = association.keys[0].$generatedFieldName;
     const service = entitySchema.projection.from.ref[0].split(".")[0];
@@ -70,8 +68,8 @@ class Service extends cds.ApplicationService {
 
     const definitions = cds.model.definitions;
     const currentEntity = cds.context.path;
-    
-    let oEntity = definitions[currentEntity]
+
+    let oEntity = definitions[currentEntity];
     while (oEntity.projection) {
       let sParentEntityName = oEntity.projection.from.ref[0];
       oEntity = cds.model.definitions[sParentEntityName];
@@ -79,10 +77,8 @@ class Service extends cds.ApplicationService {
     const schemaEntity = oEntity.name.split(".")[0];
     const isFromApi = this.apis.has(schemaEntity);
 
-
-
     if (isFromApi && !columns)
-      return this.apis.get(schemaEntity).run(req.query);
+      return await this.apis.get(schemaEntity).run(req.query);
 
     if (!columns) return next();
 
@@ -101,15 +97,22 @@ class Service extends cds.ApplicationService {
       if (remoteObject) {
         remoteObject.index = i;
         remoteObjects.push(remoteObject);
+      } else if (isFromApi) {
+        // columns.splice(columns.indexOf(columns[i]),1)
       }
     }
 
     remoteObjects.forEach((remoteObject) => {
       this._addId(columns, remoteObject.associationKey);
     });
+
     let data;
+
     if (isFromApi) {
-      data = await this.apis.get(schemaEntity).run(req.query)
+      // delete req.query.SELECT.columns
+      data = await this.apis
+        .get(schemaEntity)
+        .run(SELECT(["*"]).from(definitions[currentEntity]));
     } else data = await next();
 
     if (!Array.isArray(data)) {
