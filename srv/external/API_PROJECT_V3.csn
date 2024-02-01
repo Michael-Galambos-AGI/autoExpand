@@ -1,0 +1,2731 @@
+{
+ "meta": {
+  "creator": "cds-dk 7.5.1"
+ },
+ "$version": "2.0",
+ "definitions": {
+  "API_PROJECT_V3.SAP__Message": {
+   "kind": "type",
+   "@cds.external": true,
+   "elements": {
+    "code": {
+     "type": "cds.LargeString",
+     "notNull": true
+    },
+    "message": {
+     "type": "cds.LargeString",
+     "notNull": true
+    },
+    "target": {
+     "type": "cds.LargeString"
+    },
+    "additionalTargets": {
+     "items": {
+      "type": "cds.LargeString",
+      "notNull": true
+     }
+    },
+    "transition": {
+     "type": "cds.Boolean",
+     "notNull": true
+    },
+    "numericSeverity": {
+     "type": "cds.Integer",
+     "@odata.Type": "Edm.Byte",
+     "notNull": true
+    },
+    "longtextUrl": {
+     "type": "cds.LargeString"
+    }
+   }
+  },
+  "API_PROJECT_V3": {
+   "kind": "service",
+   "@cds.external": true,
+   "@CodeList.CurrencyCodes": {
+    "Url": "../../../../default/iwbep/common/0001/$metadata",
+    "CollectionPath": "Currencies"
+   },
+   "@CodeList.UnitsOfMeasure": {
+    "Url": "../../../../default/iwbep/common/0001/$metadata",
+    "CollectionPath": "UnitsOfMeasure"
+   },
+   "@Aggregation.ApplySupported": {
+    "Transformations": [
+     "aggregate",
+     "groupby",
+     "filter"
+    ],
+    "Rollup": {
+     "#": "None"
+    }
+   },
+   "@Common.ApplyMultiUnitBehaviorForSortingAndFiltering": true,
+   "@Capabilities.FilterFunctions": [
+    "eq",
+    "ne",
+    "gt",
+    "ge",
+    "lt",
+    "le",
+    "and",
+    "or",
+    "contains",
+    "startswith",
+    "endswith",
+    "any",
+    "all"
+   ],
+   "@Capabilities.SupportedFormats": [
+    "application/json",
+    "application/pdf"
+   ],
+   "@PDF.Features": {
+    "DocumentDescriptionReference": "../../../../default/iwbep/common/0001/$metadata",
+    "DocumentDescriptionCollection": "MyDocumentDescriptions",
+    "ArchiveFormat": true,
+    "Border": true,
+    "CoverPage": true,
+    "FitToPage": true,
+    "FontName": true,
+    "FontSize": true,
+    "Margin": true,
+    "Padding": true,
+    "Signature": true,
+    "HeaderFooter": true,
+    "ResultSizeDefault": 20000,
+    "ResultSizeMaximum": 20000
+   },
+   "@Capabilities.KeyAsSegmentSupported": true,
+   "@Capabilities.AsynchronousRequestsSupported": true
+  },
+  "API_PROJECT_V3.Project": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ProjectInternalID": {
+     "key": true,
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsDigitSequence": true,
+     "@Common.Label": "Project Def.",
+     "@Common.Heading": "Project Definition",
+     "@Common.QuickInfo": "Project (internal)"
+    },
+    "ProjectExternalID": {
+     "type": "cds.String",
+     "length": 24,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Project Definition",
+     "@Common.QuickInfo": "Project Number (External) Edited"
+    },
+    "ProjectDescription": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true,
+     "@Common.Label": "Project Name"
+    },
+    "ProjectLangBsdDescription": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.Label": "ShortTxt",
+     "@Common.QuickInfo": "Language-Dependent Short Text"
+    },
+    "ProjectProfileCode": {
+     "type": "cds.String",
+     "length": 7,
+     "notNull": true,
+     "@Common.SAPObjectNodeTypeReference": "ProjectProfileCode",
+     "@Core.Immutable": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Project Profile",
+     "@Common.Heading": "Prj.Prf"
+    },
+    "CompanyCode": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Company Code",
+     "@Common.Heading": "CoCd"
+    },
+    "ControllingArea": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Core.Immutable": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Controlling Area",
+     "@Common.Heading": "COAr"
+    },
+    "FunctionalArea": {
+     "type": "cds.String",
+     "length": 16,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Functional Area"
+    },
+    "ProfitCenter": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Profit Center",
+     "@Common.Heading": "Profit Ctr"
+    },
+    "PlannedStartDate": {
+     "type": "cds.Date",
+     "@Common.Label": "Start Date",
+     "@Common.Heading": "Start",
+     "@Common.QuickInfo": "Project planned start date"
+    },
+    "PlannedEndDate": {
+     "type": "cds.Date",
+     "@Common.Label": "Finish Date",
+     "@Common.Heading": "Finish Dat",
+     "@Common.QuickInfo": "Project planned finish date"
+    },
+    "WorkCenterLocation": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Location"
+    },
+    "TaxJurisdiction": {
+     "type": "cds.String",
+     "length": 15,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Tax Jurisdiction",
+     "@Common.Heading": "Tax Jur."
+    },
+    "ResponsiblePerson": {
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Common.IsDigitSequence": true,
+     "@Common.Label": "No. of Person Resp.",
+     "@Common.Heading": "Respons.",
+     "@Common.QuickInfo": "Number of the Responsible Person (Project Manager)"
+    },
+    "ResponsiblePersonName": {
+     "type": "cds.String",
+     "length": 25,
+     "notNull": true,
+     "@Common.Label": "Person Responsible",
+     "@Common.Heading": "Name of resp.person",
+     "@Common.QuickInfo": "Name of responsible person (Project manager)"
+    },
+    "ApplicantCode": {
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Common.IsDigitSequence": true,
+     "@Common.Label": "Applicant Number",
+     "@Common.Heading": "Appl.no.",
+     "@Common.QuickInfo": "Applicant number"
+    },
+    "ApplicantName": {
+     "type": "cds.String",
+     "length": 25,
+     "notNull": true,
+     "@Common.Label": "Applicant"
+    },
+    "CreatedByUser": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Created By",
+     "@Common.QuickInfo": "Name of Person Responsible for Creating the Object"
+    },
+    "CreationDate": {
+     "type": "cds.Date",
+     "@Core.Computed": true,
+     "@Common.Label": "Created On",
+     "@Common.QuickInfo": "Record Created On"
+    },
+    "LastChangedByUser": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Changed By",
+     "@Common.QuickInfo": "Name of Person Who Changed Object"
+    },
+    "LastChangeDate": {
+     "type": "cds.Date",
+     "@Core.Computed": true,
+     "@Common.Label": "Last Changed On",
+     "@Common.QuickInfo": "Changed On"
+    },
+    "BasicDatesLastScheduledDate": {
+     "type": "cds.Date",
+     "@Core.Computed": true,
+     "@Common.Label": "Last basic sched.",
+     "@Common.Heading": "Basic/schd",
+     "@Common.QuickInfo": "Date of last scheduling of the overall network (basic dates)"
+    },
+    "FcstdDatesLastScheduledDate": {
+     "type": "cds.Date",
+     "@Core.Computed": true,
+     "@Common.Label": "Last forecast sched.",
+     "@Common.Heading": "Fcst/sched",
+     "@Common.QuickInfo": "Date of last scheduling of the overall network (forecast)"
+    },
+    "FactoryCalendar": {
+     "type": "cds.String",
+     "length": 2,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Calendar",
+     "@Common.QuickInfo": "Appointments: Calendar"
+    },
+    "SchedulingDurationUnit": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.IsUnit": true,
+     "@Core.Computed": true,
+     "@Common.Label": "Time Unit",
+     "@Common.Heading": "Unit",
+     "@Common.QuickInfo": "Time Unit for Execution Duration"
+    },
+    "ForecastedStartDate": {
+     "type": "cds.Date",
+     "@Common.Label": "Forecast Start Date"
+    },
+    "ForecastedEndDate": {
+     "type": "cds.Date",
+     "@Common.Label": "Forecast Finish Date"
+    },
+    "BusinessArea": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Business Area",
+     "@Common.Heading": "BusA"
+    },
+    "Plant": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Plant",
+     "@Common.Heading": "Plnt"
+    },
+    "Currency": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.SAPObjectNodeTypeReference": "Currency",
+     "@Common.IsCurrency": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Project Currency",
+     "@Common.Heading": "PjCur",
+     "@Common.QuickInfo": "WBS currency (project definition)"
+    },
+    "BudgetProfile": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Budget Profile"
+    },
+    "PlanningProfile": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Planning Profile"
+    },
+    "InvestmentProfile": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Investment Profile",
+     "@Common.Heading": "InvProfile",
+     "@Common.QuickInfo": "Investment Measure Profile"
+    },
+    "ProjInterestCalcProfile": {
+     "type": "cds.String",
+     "length": 7,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Interest Profile",
+     "@Common.Heading": "Int.prof.",
+     "@Common.QuickInfo": "Interest Profile for Project/Order Interest Calculation"
+    },
+    "ResultAnalysisInternalID": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Results analysis key",
+     "@Common.Heading": "RA Key",
+     "@Common.QuickInfo": "Results Analysis Key"
+    },
+    "ControllingObjectClass": {
+     "type": "cds.String",
+     "length": 2,
+     "notNull": true,
+     "@Common.Label": "Object Class",
+     "@Common.Heading": "ObjCl"
+    },
+    "NetworkProfile": {
+     "type": "cds.String",
+     "length": 7,
+     "notNull": true,
+     "@Common.SAPObjectNodeTypeReference": "ProjectNetworkProfile",
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Network Profile",
+     "@Common.Heading": "Profile"
+    },
+    "WBSSchedulingProfile": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "WBS Scheduling Profile",
+     "@Common.QuickInfo": "Profile for WBS scheduling"
+    },
+    "PlanningMethForProjBasicDate": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true,
+     "@Common.IsDigitSequence": true,
+     "@Common.Label": "Dates Planning Metho",
+     "@Common.Heading": "Dates Planning Method",
+     "@Common.QuickInfo": "Planning method for project basic dates"
+    },
+    "PlanningMethForProjFcstdDate": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true,
+     "@Common.IsDigitSequence": true,
+     "@Common.Label": "Forecast Dates Planning Method",
+     "@Common.QuickInfo": "Planning method for project forecast dates"
+    },
+    "NetworkAssignmentType": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsDigitSequence": true,
+     "@Common.Label": "Network asst",
+     "@Common.Heading": "Ntwk asst",
+     "@Common.QuickInfo": "Network assignment"
+    },
+    "WBSIsStatisticalWBSElement": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Statistical",
+     "@Common.Heading": "St",
+     "@Common.QuickInfo": "Statistical WBS element"
+    },
+    "WBSIsMarkedForIntegratedPlng": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Integrated Planning",
+     "@Common.Heading": "IPl",
+     "@Common.QuickInfo": "Indicator for Integrated Planning"
+    },
+    "ProjectHasOwnStock": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Project Stock",
+     "@Common.Heading": "Stock"
+    },
+    "InventorySpecialStockValnType": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Spec. stk valuation",
+     "@Common.QuickInfo": "Valuation of Special Stock"
+    },
+    "WBSIsMarkedForAutomReqmtGrpg": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Auto.rqmnts grp.",
+     "@Common.Heading": "RQG",
+     "@Common.QuickInfo": "Indicator: Automatic requirements grouping"
+    },
+    "SalesOrganization": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Sales Organization",
+     "@Common.Heading": "SOrg."
+    },
+    "DistributionChannel": {
+     "type": "cds.String",
+     "length": 2,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Distribution Channel",
+     "@Common.Heading": "DChl"
+    },
+    "Language": {
+     "type": "cds.String",
+     "length": 2,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.Label": "Language Key",
+     "@Common.Heading": "Language"
+    },
+    "WBSElementMaskID": {
+     "type": "cds.String",
+     "length": 24,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Mask short ID",
+     "@Common.Heading": "Screen short ID",
+     "@Common.QuickInfo": "Selection mask for WBS element short IDs"
+    },
+    "Division": {
+     "type": "cds.String",
+     "length": 2,
+     "notNull": true,
+     "@Common.SAPObjectNodeTypeReference": "Division",
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Division",
+     "@Common.Heading": "Dv"
+    },
+    "DynItemProcessorPrfl": {
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "DIP Profile",
+     "@Common.Heading": "Profile",
+     "@Common.QuickInfo": "Dynamic Item Processor Profile"
+    },
+    "JointVenture": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Joint venture",
+     "@Common.Heading": "JV"
+    },
+    "JointVentureCostRecoveryCode": {
+     "type": "cds.String",
+     "length": 2,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Recovery Indicator",
+     "@Common.Heading": "RI"
+    },
+    "JointVentureEquityType": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Equity Type",
+     "@Common.Heading": "ET"
+    },
+    "JointVentureObjectType": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "JV Object Type",
+     "@Common.Heading": "Type",
+     "@Common.QuickInfo": "Joint Venture Object Type"
+    },
+    "JntIntrstBillgClass": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "JIB/JIBE Class",
+     "@Common.Heading": "Class"
+    },
+    "JntIntrstBillgSubClass": {
+     "type": "cds.String",
+     "length": 5,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "JIB/JIBE Subclass A",
+     "@Common.Heading": "SCl A"
+    },
+    "StatusProfile": {
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "PD status profile",
+     "@Common.Heading": "PD StPrf",
+     "@Common.QuickInfo": "Status profile for project definition"
+    },
+    "WBSStatusProfile": {
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "WBS status profile",
+     "@Common.Heading": "WBS Prof",
+     "@Common.QuickInfo": "Status profile for WBS element"
+    },
+    "SimulationProfile": {
+     "type": "cds.String",
+     "length": 7,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Simulation profile",
+     "@Common.Heading": "SimPrfl"
+    },
+    "SchedulingScenario": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Scheduling scenario",
+     "@Common.Heading": "SS"
+    },
+    "DistributionProfile": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Distribution profile",
+     "@Common.Heading": "DistPrf"
+    },
+    "PartnerDeterminationProcedure": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "PartnerDetermProced.",
+     "@Common.Heading": "ParPr",
+     "@Common.QuickInfo": "Partner Determination Procedure"
+    },
+    "FreeDefinedTableFieldSemantic": {
+     "type": "cds.String",
+     "length": 7,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Field key",
+     "@Common.Heading": "Fld key",
+     "@Common.QuickInfo": "Key word ID for user-defined fields"
+    },
+    "FreeDefinedAttribute01": {
+     "type": "cds.String",
+     "length": 20,
+     "notNull": true,
+     "@Common.Label": "Ufield 1 WBS element",
+     "@Common.Heading": "User field 1 WBS element",
+     "@Common.QuickInfo": "1st user field for 20 characters - WBS element-"
+    },
+    "FreeDefinedAttribute02": {
+     "type": "cds.String",
+     "length": 20,
+     "notNull": true,
+     "@Common.Label": "Ufield 2 WBS element",
+     "@Common.Heading": "User field 2 WBS element",
+     "@Common.QuickInfo": "2nd user field 20 digits - WBS element"
+    },
+    "FreeDefinedAttribute03": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true,
+     "@Common.Label": "Ufield 3 WBS element",
+     "@Common.Heading": "User field 3 WBS element",
+     "@Common.QuickInfo": "3rd user-defined field 10 digits -WBS element"
+    },
+    "FreeDefinedAttribute04": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true,
+     "@Common.Label": "Ufield 4 WBS element",
+     "@Common.Heading": "User field 4 WBS element",
+     "@Common.QuickInfo": "4th user-defined field 10 digits -WBS element"
+    },
+    "FreeDefinedQuantity1": {
+     "type": "cds.Decimal",
+     "precision": 13,
+     "scale": 3,
+     "notNull": true,
+     "@Measures.Unit": {
+      "=": "FreeDefinedQuantity1Unit"
+     },
+     "@Common.Label": "Ufield Quanty 1 WBS",
+     "@Common.Heading": "User field quantity 1 WBS element",
+     "@Common.QuickInfo": "1st user-defined field for quantity(length 10,3) WBS element"
+    },
+    "FreeDefinedQuantity1Unit": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.IsUnit": true,
+     "@Common.Label": "UF unit 1 WBS",
+     "@Common.Heading": "User defined field unit 1 WBS element",
+     "@Common.QuickInfo": "1st user defined field for quantity field unit - WBS element"
+    },
+    "FreeDefinedQuantity2": {
+     "type": "cds.Decimal",
+     "precision": 13,
+     "scale": 3,
+     "notNull": true,
+     "@Measures.Unit": {
+      "=": "FreeDefinedQuantity2Unit"
+     },
+     "@Common.Label": "UF Qty 2 WBS",
+     "@Common.Heading": "Userfield quantity 2 WBS element",
+     "@Common.QuickInfo": "2nd use field for quantity (length 10,3) WBS element"
+    },
+    "FreeDefinedQuantity2Unit": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.IsUnit": true,
+     "@Common.Label": "UF unit 2 WBS",
+     "@Common.Heading": "User defined field 2 WBS element",
+     "@Common.QuickInfo": "2nd user defined field for quantity field unit - WBS element"
+    },
+    "FreeDefinedAmount1": {
+     "type": "cds.Decimal",
+     "precision": 13,
+     "notNull": true,
+     "@Common.Label": "User field value 1 for Project",
+     "@Measures.ISOCurrency": {
+      "=": "FreeDefinedAmount1Currency"
+     }
+    },
+    "FreeDefinedAmount1Currency": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.IsCurrency": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Ufield unit 1 WBS",
+     "@Common.Heading": "User defined field unit 1 WBS element",
+     "@Common.QuickInfo": "1st user defined field for value field unit - WBS element"
+    },
+    "FreeDefinedAmount2": {
+     "type": "cds.Decimal",
+     "precision": 13,
+     "notNull": true,
+     "@Common.Label": "User field value 2 for Project",
+     "@Measures.ISOCurrency": {
+      "=": "FreeDefinedAmount2Currency"
+     }
+    },
+    "FreeDefinedAmount2Currency": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.IsCurrency": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Ufield unit 2 WBS",
+     "@Common.Heading": "User defined field 2 WBS element",
+     "@Common.QuickInfo": "2nd user defined field for value field unit - WBS element"
+    },
+    "FreeDefinedDate1": {
+     "type": "cds.Date",
+     "@Common.Label": "Ufield date 1 WBS",
+     "@Common.Heading": "User field date 1 WBS element",
+     "@Common.QuickInfo": "1st user field for date -WBS element"
+    },
+    "FreeDefinedDate2": {
+     "type": "cds.Date",
+     "@Common.Label": "Ufield date 2 WBS",
+     "@Common.Heading": "User field date 2 WBS element",
+     "@Common.QuickInfo": "2nd user field for date -WBS element"
+    },
+    "FreeDefinedIndicator1": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Ufield Ind. 1 WBS",
+     "@Common.Heading": "User field indicator 1 WBS element",
+     "@Common.QuickInfo": "1st user field for 'Ind. for evaluations' WBS elem."
+    },
+    "FreeDefinedIndicator2": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Ufield Ind. 2 WBS",
+     "@Common.Heading": "User field indicator 2 WBS element",
+     "@Common.QuickInfo": "2nd user field for 'Indicator for eval.s' WBS elemnt"
+    },
+    "StatusCombinationCode": {
+     "type": "cds.Integer",
+     "@odata.Type": "Edm.Byte",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.Label": "Status Comb. Code",
+     "@Common.Heading": "CombCd",
+     "@Common.QuickInfo": "Status Combination"
+    },
+    "SAP__Messages": {
+     "items": {
+      "type": "API_PROJECT_V3.SAP__Message",
+      "notNull": true
+     }
+    },
+    "_ProjectStatus": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "API_PROJECT_V3.ProjectStatus",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    },
+    "_WBSElement": {
+     "type": "cds.Composition",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "API_PROJECT_V3.WBSElement",
+     "cardinality": {
+      "max": "*"
+     },
+     "@Common.Composition": true
+    }
+   },
+   "actions": {
+    "SetUserStatusToProject": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      },
+      "UserStatusShortName": {
+       "type": "cds.String",
+       "length": 4,
+       "notNull": true,
+       "@Common.Label": "Status",
+       "@Common.Heading": "Stat",
+       "@Common.QuickInfo": "Individual status of an object (short form)"
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.Project",
+      "notNull": true
+     }
+    },
+    "SetAndPassUserStatusToProject": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      },
+      "UserStatusShortName": {
+       "type": "cds.String",
+       "length": 4,
+       "notNull": true,
+       "@Common.Label": "Status",
+       "@Common.Heading": "Stat",
+       "@Common.QuickInfo": "Individual status of an object (short form)"
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.Project",
+      "notNull": true
+     }
+    },
+    "ReleaseProject": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.Project",
+      "notNull": true
+     }
+    },
+    "UnlockProjectMasterData": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.Project",
+      "notNull": true
+     }
+    },
+    "UndoCompleteProjectTechnically": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.Project",
+      "notNull": true
+     }
+    },
+    "LockProjectMasterData": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.Project",
+      "notNull": true
+     }
+    },
+    "SetProjectToDeletion": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.Project",
+      "notNull": true
+     }
+    },
+    "SetProjectToClosed": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.Project",
+      "notNull": true
+     }
+    },
+    "UndoAndPassProjectUserStatus": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      },
+      "UserStatusShortName": {
+       "type": "cds.String",
+       "length": 4,
+       "notNull": true,
+       "@Common.Label": "Status",
+       "@Common.Heading": "Stat",
+       "@Common.QuickInfo": "Individual status of an object (short form)"
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.Project",
+      "notNull": true
+     }
+    },
+    "UndoProjectClosed": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.Project",
+      "notNull": true
+     }
+    },
+    "UndoProjectDeletion": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.Project",
+      "notNull": true
+     }
+    },
+    "CompleteProjectTechnically": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.Project",
+      "notNull": true
+     }
+    },
+    "UndoProjectUserStatus": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      },
+      "UserStatusShortName": {
+       "type": "cds.String",
+       "length": 4,
+       "notNull": true,
+       "@Common.Label": "Status",
+       "@Common.Heading": "Stat",
+       "@Common.QuickInfo": "Individual status of an object (short form)"
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.Project",
+      "notNull": true
+     }
+    }
+   },
+   "@Common.Label": "Project data details",
+   "@Common.Messages": {
+    "=": "SAP__Messages"
+   },
+   "@Capabilities.NavigationRestrictions.RestrictedProperties": [
+    {
+     "NavigationProperty": {
+      "=": "_WBSElement"
+     },
+     "InsertRestrictions": {
+      "Insertable": true
+     }
+    }
+   ],
+   "@Capabilities.SearchRestrictions.Searchable": false,
+   "@Capabilities.FilterRestrictions.FilterExpressionRestrictions": [
+    {
+     "Property": {
+      "=": "FreeDefinedQuantity1"
+     },
+     "AllowedExpressions": "MultiValue"
+    },
+    {
+     "Property": {
+      "=": "FreeDefinedQuantity2"
+     },
+     "AllowedExpressions": "MultiValue"
+    },
+    {
+     "Property": {
+      "=": "FreeDefinedAmount1"
+     },
+     "AllowedExpressions": "MultiValue"
+    },
+    {
+     "Property": {
+      "=": "FreeDefinedAmount2"
+     },
+     "AllowedExpressions": "MultiValue"
+    }
+   ],
+   "@Capabilities.UpdateRestrictions.QueryOptions.SelectSupported": true
+  },
+  "API_PROJECT_V3.ProjectStatus": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "ProjectInternalID": {
+     "key": true,
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Common.IsDigitSequence": true,
+     "@Common.Label": "Project Def.",
+     "@Common.Heading": "Project Definition",
+     "@Common.QuickInfo": "Project (internal)"
+    },
+    "StatusCode": {
+     "key": true,
+     "type": "cds.String",
+     "length": 5,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Status",
+     "@Common.Heading": "Stat.",
+     "@Common.QuickInfo": "Object status"
+    },
+    "StatusObject": {
+     "type": "cds.String",
+     "length": 22,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Object number"
+    },
+    "StatusProfile": {
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Status Profile",
+     "@Common.Heading": "StatProf"
+    },
+    "StatusIsActive": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true
+    },
+    "IsUserStatus": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true
+    },
+    "StatusShortName": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Common.Label": "Status",
+     "@Common.Heading": "Stat",
+     "@Common.QuickInfo": "Individual status of an object (short form)"
+    },
+    "StatusName": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.Label": "Status",
+     "@Common.QuickInfo": "Individual Status of an Object"
+    },
+    "_Project": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "API_PROJECT_V3.Project",
+     "cardinality": {
+      "max": 1
+     },
+     "on": [
+      {
+       "ref": [
+        "_Project",
+        "ProjectInternalID"
+       ]
+      },
+      "=",
+      {
+       "ref": [
+        "ProjectInternalID"
+       ]
+      }
+     ]
+    }
+   },
+   "@Common.Label": "Project status",
+   "@Capabilities.NavigationRestrictions.RestrictedProperties": [
+    {
+     "NavigationProperty": {
+      "=": "_Project"
+     },
+     "InsertRestrictions": {
+      "Insertable": true
+     }
+    }
+   ],
+   "@Capabilities.SearchRestrictions.Searchable": false,
+   "@Capabilities.InsertRestrictions.Insertable": false,
+   "@Capabilities.DeleteRestrictions.Deletable": false,
+   "@Capabilities.UpdateRestrictions.Updatable": false,
+   "@Capabilities.UpdateRestrictions.QueryOptions.SelectSupported": true
+  },
+  "API_PROJECT_V3.WBSElement": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "WBSElementInternalID": {
+     "key": true,
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsDigitSequence": true,
+     "@Common.Label": "WBS Internal ID",
+     "@Common.Heading": "WBS Elem",
+     "@Common.QuickInfo": "WBS Element"
+    },
+    "WBSElementExternalID": {
+     "type": "cds.String",
+     "length": 24,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "WBS Element",
+     "@Common.QuickInfo": "Work Breakdown Structure Element (WBS Element) Edited"
+    },
+    "WBSElementShortID": {
+     "type": "cds.String",
+     "length": 16,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Short ID (WBS elem)",
+     "@Common.Heading": "Short Identification",
+     "@Common.QuickInfo": "WBS element short identification"
+    },
+    "WBSDescription": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true,
+     "@Common.Label": "WBS Element Name",
+     "@Common.QuickInfo": "Work Breakdown Structure Element Name"
+    },
+    "WBSElementLangBsdDescription": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.Label": "ShortTxt",
+     "@Common.QuickInfo": "Language-Dependent Short Text"
+    },
+    "ResponsiblePerson": {
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Common.IsDigitSequence": true,
+     "@Common.Label": "Person No.",
+     "@Common.Heading": "Responsible Person Number (Project Manager)",
+     "@Common.QuickInfo": "Responsible Person Number (Project Manager)"
+    },
+    "ResponsiblePersonName": {
+     "type": "cds.String",
+     "length": 25,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.Label": "Person Responsible",
+     "@Common.Heading": "Name of resp.person",
+     "@Common.QuickInfo": "Name of responsible person (Project manager)"
+    },
+    "ApplicantCode": {
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Common.IsDigitSequence": true,
+     "@Common.Label": "Applicant Number",
+     "@Common.Heading": "Appl.no.",
+     "@Common.QuickInfo": "Applicant number"
+    },
+    "ApplicantName": {
+     "type": "cds.String",
+     "length": 25,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.Label": "Applicant"
+    },
+    "CompanyCode": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Company Code",
+     "@Common.Heading": "CoCd"
+    },
+    "BusinessArea": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Business Area",
+     "@Common.Heading": "BusA"
+    },
+    "ControllingArea": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Controlling Area"
+    },
+    "FunctionalArea": {
+     "type": "cds.String",
+     "length": 16,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Functional Area"
+    },
+    "ProfitCenter": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Profit Center",
+     "@Common.Heading": "Profit Ctr"
+    },
+    "ResponsibleCostCenter": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Responsible Cost Center"
+    },
+    "Plant": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Plant",
+     "@Common.Heading": "Plnt"
+    },
+    "FreeDefinedTableFieldSemantic": {
+     "type": "cds.String",
+     "length": 7,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Field key",
+     "@Common.Heading": "Fld key",
+     "@Common.QuickInfo": "Key word ID for user-defined fields"
+    },
+    "FactoryCalendar": {
+     "type": "cds.String",
+     "length": 2,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Calendar",
+     "@Common.Heading": "Cal"
+    },
+    "PriorityCode": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true,
+     "@Common.SAPObjectNodeTypeReference": "ProjectObjectPriorityCode",
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Priority",
+     "@Common.Heading": "Pri"
+    },
+    "Currency": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.SAPObjectNodeTypeReference": "Currency",
+     "@Common.IsCurrency": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Currency",
+     "@Common.Heading": "Curr.",
+     "@Common.QuickInfo": "WBS element currency"
+    },
+    "CostingSheet": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Costing Sheet",
+     "@Common.Heading": "CostSh"
+    },
+    "CostCenter": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "CCtr posted actual",
+     "@Common.Heading": "CCtr post.",
+     "@Common.QuickInfo": "Cost center to which costs are actually posted"
+    },
+    "RequestingCostCenter": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Requesting Cost Center",
+     "@Common.Heading": "Req. CC",
+     "@Common.QuickInfo": "Requesting cost center"
+    },
+    "ProjectInternalID": {
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Core.Immutable": true,
+     "@Common.IsDigitSequence": true,
+     "@Common.Label": "Project Def.",
+     "@Common.Heading": "Project Definition",
+     "@Common.QuickInfo": "Project (internal)"
+    },
+    "WBSElementIsBillingElement": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Billing Element",
+     "@Common.Heading": "Bill",
+     "@Common.QuickInfo": "Indicator: Billing element"
+    },
+    "InvestmentProfile": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Investment Profile",
+     "@Common.Heading": "InvProfile",
+     "@Common.QuickInfo": "Investment Measure Profile"
+    },
+    "WBSIsStatisticalWBSElement": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Statistical",
+     "@Common.Heading": "St",
+     "@Common.QuickInfo": "Statistical WBS element"
+    },
+    "WBSIsAccountAssignmentElement": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Account Assignment Element",
+     "@Common.Heading": "Acct",
+     "@Common.QuickInfo": "Indicator: Account assignment element"
+    },
+    "ProjectType": {
+     "type": "cds.String",
+     "length": 2,
+     "notNull": true,
+     "@Common.SAPObjectNodeTypeReference": "ProjectType",
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Project Type"
+    },
+    "WBSElementIsPlanningElement": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Planning Element",
+     "@Common.Heading": "PE",
+     "@Common.QuickInfo": "Indicator: Planning element"
+    },
+    "WorkCenterLocation": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Location"
+    },
+    "ResultAnalysisInternalID": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Results analysis key",
+     "@Common.Heading": "RA Key",
+     "@Common.QuickInfo": "Results Analysis Key"
+    },
+    "TaxJurisdiction": {
+     "type": "cds.String",
+     "length": 15,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Tax Jurisdiction",
+     "@Common.Heading": "Tax Jur."
+    },
+    "FunctionalLocation": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Functional location"
+    },
+    "FunctionalLocationLabelName": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Functional Location",
+     "@Common.QuickInfo": "Functional Location Label"
+    },
+    "CreatedByUser": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Created By",
+     "@Common.QuickInfo": "Name of Person Responsible for Creating the Object"
+    },
+    "CreationDate": {
+     "type": "cds.Date",
+     "@Core.Computed": true,
+     "@Common.Label": "Created On",
+     "@Common.QuickInfo": "Record Created On"
+    },
+    "LastChangedByUser": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Changed By",
+     "@Common.QuickInfo": "Name of Person Who Changed Object"
+    },
+    "LastChangeDate": {
+     "type": "cds.Date",
+     "@Core.Computed": true,
+     "@Common.Label": "Changed on",
+     "@Common.Heading": "Changed On",
+     "@Common.QuickInfo": "Date on which object was last changed"
+    },
+    "RespCostCenterControllingArea": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "CA resp. cost center",
+     "@Common.Heading": "CtrA",
+     "@Common.QuickInfo": "Responsible Cost Center Controlling Area"
+    },
+    "WBSIsMarkedForIntegratedPlng": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Integrated Planning",
+     "@Common.Heading": "IPl",
+     "@Common.QuickInfo": "Indicator 'Integrated Planning' for Cost Object Category"
+    },
+    "Equipment": {
+     "type": "cds.String",
+     "length": 18,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Equipment",
+     "@Common.QuickInfo": "Equipment Number"
+    },
+    "ProjectObjectChangeNumber": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Change Number",
+     "@Common.Heading": "Change No."
+    },
+    "WBSElementHierarchyLevel": {
+     "type": "cds.Integer",
+     "@odata.Type": "Edm.Byte",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.Label": "Level",
+     "@Common.Heading": "Lev",
+     "@Common.QuickInfo": "Level in Project Hierarchy"
+    },
+    "OverheadCode": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Overhead Key",
+     "@Common.Heading": "OH Key"
+    },
+    "ReferenceElement": {
+     "type": "cds.String",
+     "length": 40,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Reference Element",
+     "@Common.QuickInfo": "Reference Element PM/PS"
+    },
+    "ProjInterestCalcProfile": {
+     "type": "cds.String",
+     "length": 7,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Interest Profile",
+     "@Common.Heading": "Int.prof.",
+     "@Common.QuickInfo": "Interest Profile for Project/Order Interest Calculation"
+    },
+    "ProgressAnlysAggregationWeight": {
+     "type": "cds.Decimal",
+     "precision": 8,
+     "notNull": true,
+     "@Common.Label": "POC Weight",
+     "@Common.Heading": "POC weight",
+     "@Common.QuickInfo": "Aggregation weight for POC (PS progress)"
+    },
+    "ReqgCostCenterControllingArea": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "CA req. cost center",
+     "@Common.Heading": "CtrA",
+     "@Common.QuickInfo": "Controlling area of requesting cost center"
+    },
+    "Language": {
+     "type": "cds.String",
+     "length": 2,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.Label": "Language Key",
+     "@Common.Heading": "Language"
+    },
+    "IsMarkedForDeletion": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.Label": "Flagged for Deletion",
+     "@Common.QuickInfo": "Deletion Indicator"
+    },
+    "WBSElementIsGroupingWBSElement": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Grouping WBS element",
+     "@Common.Heading": "MRP",
+     "@Common.QuickInfo": "Indicator: Grouping WBS element"
+    },
+    "WBSElementIsUsedInProjSmmry": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Proj. summarization",
+     "@Common.Heading": "Su",
+     "@Common.QuickInfo": "Indicator: WBS element used in project summarization"
+    },
+    "CostingVariant": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Costing Variant"
+    },
+    "BasicStartDate": {
+     "type": "cds.Date",
+     "@Common.Label": "Start Date",
+     "@Common.Heading": "BscStart",
+     "@Common.QuickInfo": "WBS element: Basic start date"
+    },
+    "ForecastedStartDate": {
+     "type": "cds.Date",
+     "@Common.Label": "Forecast Start Date",
+     "@Common.QuickInfo": "Forecast Start Date of WBS Element"
+    },
+    "ActualStartDate": {
+     "type": "cds.Date",
+     "@Common.Label": "Actual Start Date",
+     "@Common.Heading": "ActStart",
+     "@Common.QuickInfo": "Actual start date for the WBS element"
+    },
+    "BasicEndDate": {
+     "type": "cds.Date",
+     "@Common.Label": "Finish Date",
+     "@Common.Heading": "Bsc Fin",
+     "@Common.QuickInfo": "WBS element: Basic finish date"
+    },
+    "ForecastedEndDate": {
+     "type": "cds.Date",
+     "@Common.Label": "Forecast Finish Date",
+     "@Common.QuickInfo": "Forecast Finish Date of WBS Element"
+    },
+    "ActualEndDate": {
+     "type": "cds.Date",
+     "@Common.Label": "Actual Finish Date",
+     "@Common.Heading": "Act.Fin",
+     "@Common.QuickInfo": "Actual finish date of the WBS element"
+    },
+    "TechnicalCompletionDate": {
+     "type": "cds.Date",
+     "@Core.Computed": true,
+     "@Common.Label": "Technical completion",
+     "@Common.Heading": "TecComp",
+     "@Common.QuickInfo": "Technically complete date"
+    },
+    "BasicDuration": {
+     "type": "cds.Decimal",
+     "precision": 5,
+     "scale": 1,
+     "notNull": true,
+     "@Measures.Unit": {
+      "=": "BasicDurationUnit"
+     },
+     "@Common.Label": "Duration",
+     "@Common.Heading": "Duratn",
+     "@Common.QuickInfo": "Length (duration) of the basic dates in the WBS element"
+    },
+    "BasicDurationUnit": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.IsUnit": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Duration Unit",
+     "@Common.Heading": "Un.",
+     "@Common.QuickInfo": "Unit for duration of basic WBS element dates"
+    },
+    "ForecastedDuration": {
+     "type": "cds.Decimal",
+     "precision": 5,
+     "scale": 1,
+     "notNull": true,
+     "@Measures.Unit": {
+      "=": "ForecastedDurationUnit"
+     },
+     "@Common.Label": "Forecast Duration",
+     "@Common.Heading": "Duratn",
+     "@Common.QuickInfo": "Forecasted length (duration) of the WBS element"
+    },
+    "ForecastedDurationUnit": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.IsUnit": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Forecast Duration Unit",
+     "@Common.Heading": "Un.",
+     "@Common.QuickInfo": "Unit for duration of WBS element planned dates"
+    },
+    "ActualDuration": {
+     "type": "cds.Decimal",
+     "precision": 5,
+     "scale": 1,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Measures.Unit": {
+      "=": "ActualDurationUnit"
+     },
+     "@Common.Label": "Actual Duration",
+     "@Common.Heading": "Duratn",
+     "@Common.QuickInfo": "Actual length (duration) of the WBS element"
+    },
+    "ActualDurationUnit": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.IsUnit": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Unit of measure",
+     "@Common.Heading": "Un.",
+     "@Common.QuickInfo": "Unit for duration of actual WBS element dates"
+    },
+    "SchedldBasicEarliestStartDate": {
+     "type": "cds.Date",
+     "@Core.Computed": true,
+     "@Common.Label": "Earliest Start Date",
+     "@Common.Heading": "Earliest start",
+     "@Common.QuickInfo": "Earliest scheduled start date (Basic)"
+    },
+    "ScheduledBasicLatestEndDate": {
+     "type": "cds.Date",
+     "@Core.Computed": true,
+     "@Common.Label": "Latest Finish Date",
+     "@Common.Heading": "Lat.finish date",
+     "@Common.QuickInfo": "Latest scheduled finish date (basic)"
+    },
+    "SchedldFcstdEarliestStartDate": {
+     "type": "cds.Date",
+     "@Core.Computed": true,
+     "@Common.Label": "Earliest Forecast Start Date",
+     "@Common.Heading": "Earliest start",
+     "@Common.QuickInfo": "Scheduled start date (Forecast)"
+    },
+    "LatestSchedldFcstdEndDate": {
+     "type": "cds.Date",
+     "@Core.Computed": true,
+     "@Common.Label": "Latest Forecast Finish Date",
+     "@Common.Heading": "LatestFin.",
+     "@Common.QuickInfo": "Latest scheduled  finish date (Forecast)"
+    },
+    "TentativeActualStartDate": {
+     "type": "cds.Date",
+     "@Core.Computed": true,
+     "@Common.Label": "Actual Tentative Start Date",
+     "@Common.Heading": "Tent. Actual Start",
+     "@Common.QuickInfo": "Tentative actual start date for WBS element"
+    },
+    "TentativeActualEndDate": {
+     "type": "cds.Date",
+     "@Core.Computed": true,
+     "@Common.Label": "Actual Tentative Finish Date",
+     "@Common.Heading": "Act.Finish (Tent.)",
+     "@Common.QuickInfo": "Tentative actual finish date for WBS element"
+    },
+    "JointVenture": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Joint venture",
+     "@Common.Heading": "JV"
+    },
+    "JointVentureCostRecoveryCode": {
+     "type": "cds.String",
+     "length": 2,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Recovery Indicator",
+     "@Common.Heading": "RI"
+    },
+    "JointVentureEquityType": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Equity Type",
+     "@Common.Heading": "ET"
+    },
+    "JntVntrProjectType": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "JV Object Type",
+     "@Common.Heading": "Type",
+     "@Common.QuickInfo": "Joint Venture Object Type"
+    },
+    "JntIntrstBillgClass": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "JIB/JIBE Class",
+     "@Common.Heading": "Class"
+    },
+    "JntIntrstBillgSubClass": {
+     "type": "cds.String",
+     "length": 5,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "JIB/JIBE Subclass A",
+     "@Common.Heading": "SCl A"
+    },
+    "SubProject": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Core.Immutable": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Subproject",
+     "@Common.QuickInfo": "Sub-project in work breakdown structure"
+    },
+    "InvestmentReason": {
+     "type": "cds.String",
+     "length": 2,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Investment Reason",
+     "@Common.Heading": "IR",
+     "@Common.QuickInfo": "Reason for Investment"
+    },
+    "InvestmentScale": {
+     "type": "cds.String",
+     "length": 2,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Scale",
+     "@Common.QuickInfo": "Scale of investment objects"
+    },
+    "EnvironmentalInvestmentReason": {
+     "type": "cds.String",
+     "length": 5,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Envir. Investment",
+     "@Common.Heading": "EnInv",
+     "@Common.QuickInfo": "Reason for Environmental Investment"
+    },
+    "RequestingCompanyCode": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Requesting co. code",
+     "@Common.Heading": "RqCC",
+     "@Common.QuickInfo": "Requesting company code"
+    },
+    "NetworkAssignmentType": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsDigitSequence": true,
+     "@Common.Label": "Network asst",
+     "@Common.Heading": "Ntwk asst",
+     "@Common.QuickInfo": "Network assignment"
+    },
+    "CostObject": {
+     "type": "cds.String",
+     "length": 12,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Cost Object",
+     "@Common.Heading": "CostObject"
+    },
+    "BillingPlan": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Bill. Plan No.",
+     "@Common.Heading": "Bill. Plan",
+     "@Common.QuickInfo": "Billing Plan Number / Invoicing Plan Number"
+    },
+    "ControllingObjectClass": {
+     "type": "cds.String",
+     "length": 2,
+     "notNull": true,
+     "@Common.Label": "Object Class",
+     "@Common.Heading": "ObjCl"
+    },
+    "WBSElementParentInternalID": {
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Common.Label": "Superior",
+     "@Common.QuickInfo": "Number of the superior WBS element",
+     "@Common.IsDigitSequence": true,
+     "@Common.Heading": "WBS Elem"
+    },
+    "WBSElementChildInternalID": {
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Common.Label": "1st subordinate",
+     "@Common.QuickInfo": "Number of the 1. subordinate WBS element",
+     "@Core.Computed": true,
+     "@Common.IsDigitSequence": true,
+     "@Common.Heading": "WBS Elem"
+    },
+    "LeftSiblingWBSElmntInternalID": {
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Common.Label": "Left adjacent",
+     "@Common.QuickInfo": "Number of the left adjacent position in WBS",
+     "@Common.IsDigitSequence": true,
+     "@Common.Heading": "WBS Elem"
+    },
+    "RightSiblingWBSElmntInternalID": {
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Common.Label": "Right adjacent",
+     "@Common.QuickInfo": "Number of the right adjacent position in WBS",
+     "@Core.Computed": true,
+     "@Common.IsDigitSequence": true,
+     "@Common.Heading": "WBS Elem"
+    },
+    "FreeDefinedAttribute01": {
+     "type": "cds.String",
+     "length": 20,
+     "notNull": true,
+     "@Common.Label": "Ufield 1 WBS element",
+     "@Common.Heading": "User field 1 WBS element",
+     "@Common.QuickInfo": "1st user field for 20 characters - WBS element-"
+    },
+    "FreeDefinedAttribute02": {
+     "type": "cds.String",
+     "length": 20,
+     "notNull": true,
+     "@Common.Label": "Ufield 2 WBS element",
+     "@Common.Heading": "User field 2 WBS element",
+     "@Common.QuickInfo": "2nd user field 20 digits - WBS element"
+    },
+    "FreeDefinedAttribute03": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true,
+     "@Common.Label": "Ufield 3 WBS element",
+     "@Common.Heading": "User field 3 WBS element",
+     "@Common.QuickInfo": "3rd user-defined field 10 digits -WBS element"
+    },
+    "FreeDefinedAttribute04": {
+     "type": "cds.String",
+     "length": 10,
+     "notNull": true,
+     "@Common.Label": "Ufield 4 WBS element",
+     "@Common.Heading": "User field 4 WBS element",
+     "@Common.QuickInfo": "4th user-defined field 10 digits -WBS element"
+    },
+    "FreeDefinedQuantity1": {
+     "type": "cds.Decimal",
+     "precision": 13,
+     "scale": 3,
+     "notNull": true,
+     "@Measures.Unit": {
+      "=": "FreeDefinedQuantity1Unit"
+     },
+     "@Common.Label": "Ufield Quanty 1 WBS",
+     "@Common.Heading": "User field quantity 1 WBS element",
+     "@Common.QuickInfo": "1st user-defined field for quantity(length 10,3) WBS element"
+    },
+    "FreeDefinedQuantity1Unit": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.IsUnit": true,
+     "@Common.Label": "UF unit 1 WBS",
+     "@Common.Heading": "User defined field unit 1 WBS element",
+     "@Common.QuickInfo": "1st user defined field for quantity field unit - WBS element"
+    },
+    "FreeDefinedQuantity2": {
+     "type": "cds.Decimal",
+     "precision": 13,
+     "scale": 3,
+     "notNull": true,
+     "@Measures.Unit": {
+      "=": "FreeDefinedQuantity2Unit"
+     },
+     "@Common.Label": "UF Qty 2 WBS",
+     "@Common.Heading": "Userfield quantity 2 WBS element",
+     "@Common.QuickInfo": "2nd use field for quantity (length 10,3) WBS element"
+    },
+    "FreeDefinedQuantity2Unit": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.IsUnit": true,
+     "@Common.Label": "UF unit 2 WBS",
+     "@Common.Heading": "User defined field 2 WBS element",
+     "@Common.QuickInfo": "2nd user defined field for quantity field unit - WBS element"
+    },
+    "FreeDefinedAmount1": {
+     "type": "cds.Decimal",
+     "precision": 13,
+     "notNull": true,
+     "@Common.Label": "Ufield value 1 WBS",
+     "@Common.QuickInfo": "1st user field for values (length 13,2) WBS element",
+     "@Measures.ISOCurrency": {
+      "=": "FreeDefinedAmount1Currency"
+     }
+    },
+    "FreeDefinedAmount1Currency": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.IsCurrency": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Ufield unit 1 WBS",
+     "@Common.Heading": "User defined field unit 1 WBS element",
+     "@Common.QuickInfo": "1st user defined field for value field unit - WBS element"
+    },
+    "FreeDefinedAmount2": {
+     "type": "cds.Decimal",
+     "precision": 13,
+     "notNull": true,
+     "@Common.Label": "Ufield value 2 WBS",
+     "@Common.QuickInfo": "2nd user field for values (length 13,2) WBS element",
+     "@Measures.ISOCurrency": {
+      "=": "FreeDefinedAmount1Currency"
+     }
+    },
+    "FreeDefinedAmount2Currency": {
+     "type": "cds.String",
+     "length": 3,
+     "notNull": true,
+     "@Common.IsCurrency": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Ufield unit 2 WBS",
+     "@Common.Heading": "User defined field 2 WBS element",
+     "@Common.QuickInfo": "2nd user defined field for value field unit - WBS element"
+    },
+    "FreeDefinedDate1": {
+     "type": "cds.Date",
+     "@Common.Label": "Ufield date 1 WBS",
+     "@Common.Heading": "User field date 1 WBS element",
+     "@Common.QuickInfo": "1st user field for date -WBS element"
+    },
+    "FreeDefinedDate2": {
+     "type": "cds.Date",
+     "@Common.Label": "Ufield date 2 WBS",
+     "@Common.Heading": "User field date 2 WBS element",
+     "@Common.QuickInfo": "2nd user field for date -WBS element"
+    },
+    "FreeDefinedIndicator1": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Ufield Ind. 1 WBS",
+     "@Common.Heading": "User field indicator 1 WBS element",
+     "@Common.QuickInfo": "1st user field for 'Ind. for evaluations' WBS elem."
+    },
+    "FreeDefinedIndicator2": {
+     "type": "cds.Boolean",
+     "notNull": true,
+     "@Common.Label": "Ufield Ind. 2 WBS",
+     "@Common.Heading": "User field indicator 2 WBS element",
+     "@Common.QuickInfo": "2nd user field for 'Indicator for eval.s' WBS elemnt"
+    },
+    "StatusProfile": {
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Status Profile",
+     "@Common.Heading": "StatProf"
+    },
+    "DistributionProfile": {
+     "type": "cds.String",
+     "length": 6,
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Distribution profile",
+     "@Common.Heading": "DistPrf"
+    },
+    "SchedldBasicEarliestEndDate": {
+     "type": "cds.Date",
+     "@Common.Label": "Earliest Finish Date",
+     "@Common.Heading": "Earliest finish",
+     "@Common.QuickInfo": "Earliest scheduled finish date (basic)"
+    },
+    "SchedldBasicLatestStartDate": {
+     "type": "cds.Date",
+     "@Common.Label": "Latest Start Date",
+     "@Common.Heading": "Latest start",
+     "@Common.QuickInfo": "Latest scheduled start date (basic)"
+    },
+    "SchedldFcstdEarliestEndDate": {
+     "type": "cds.Date",
+     "@Common.Label": "Earliest finish date",
+     "@Common.Heading": "Earliest finish",
+     "@Common.QuickInfo": "Earliest scheduled finish date (forecast)"
+    },
+    "LatestSchedldFcstdStartDate": {
+     "type": "cds.Date",
+     "@Common.Label": "latest start date",
+     "@Common.Heading": "Latest start",
+     "@Common.QuickInfo": "Latest scheduled start date (forecast)"
+    },
+    "StatusCombinationCode": {
+     "type": "cds.Integer",
+     "@odata.Type": "Edm.Byte",
+     "notNull": true,
+     "@Core.Computed": true,
+     "@Common.Label": "Status Comb. Code",
+     "@Common.Heading": "CombCd",
+     "@Common.QuickInfo": "Status Combination"
+    },
+    "SAP__Messages": {
+     "items": {
+      "type": "API_PROJECT_V3.SAP__Message",
+      "notNull": true
+     }
+    },
+    "_ParentWBSElement": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "API_PROJECT_V3.WBSElement",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    },
+    "_Project": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "API_PROJECT_V3.Project",
+     "cardinality": {
+      "max": 1
+     },
+     "on": [
+      {
+       "ref": [
+        "_Project",
+        "ProjectInternalID"
+       ]
+      },
+      "=",
+      {
+       "ref": [
+        "ProjectInternalID"
+       ]
+      }
+     ]
+    },
+    "_SubWBSElement": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "API_PROJECT_V3.WBSElement",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    },
+    "_WBSElementStatus": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "API_PROJECT_V3.WBSElementStatus",
+     "cardinality": {
+      "max": "*"
+     },
+     "keys": []
+    }
+   },
+   "actions": {
+    "LockWBSElementPlanning": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "SetWBSElementToOrderAccepted": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "CompleteWBSElementTechnically": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "LockWBSElementDates": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "SetWBSElementToClosed": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "UndoWBSElementClosed": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "SetWBSElementToFullyInvoiced": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "UnlockWBSElementAll": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "SetAndPassUserStsToWBSElement": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      },
+      "UserStatusShortName": {
+       "type": "cds.String",
+       "length": 4,
+       "notNull": true,
+       "@Common.Label": "Status",
+       "@Common.Heading": "Stat",
+       "@Common.QuickInfo": "Individual status of an object (short form)"
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "UndoCompleteWBSElementTechly": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "SetWBSElementToDeletion": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "UndoWBSElementFullyInvoiced": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "LockWBSElementAll": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "UnlockWBSElementAcctAsgt": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "UndoWBSElementDeletion": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "LockWBSElementMasterData": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "UndoWBSElementUserStatus": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      },
+      "UserStatusShortName": {
+       "type": "cds.String",
+       "length": 4,
+       "notNull": true,
+       "@Common.Label": "Status",
+       "@Common.Heading": "Stat",
+       "@Common.QuickInfo": "Individual status of an object (short form)"
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "LockWBSElementAcctAsgt": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "ReleaseWBSElement": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "UndoAndPassWBSElementUserSts": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      },
+      "UserStatusShortName": {
+       "type": "cds.String",
+       "length": 4,
+       "notNull": true,
+       "@Common.Label": "Status",
+       "@Common.Heading": "Stat",
+       "@Common.QuickInfo": "Individual status of an object (short form)"
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "UndoWBSElementOrderAccepted": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "UnlockWBSElementPlanning": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "LockWBSElementBudget": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "UnlockWBSElementDates": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "ChangeWBSElementPosition": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      },
+      "LeftSiblingWBSElmntInternalID": {
+       "type": "cds.String",
+       "length": 8,
+       "notNull": true,
+       "@Common.Label": "WBS Internal ID",
+       "@Common.Heading": "WBS Elem",
+       "@Common.QuickInfo": "WBS Element"
+      },
+      "WBSElementParentInternalID": {
+       "type": "cds.String",
+       "length": 8,
+       "notNull": true,
+       "@Common.Label": "WBS Internal ID",
+       "@Common.Heading": "WBS Elem",
+       "@Common.QuickInfo": "WBS Element"
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "UnlockWBSElementBudget": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "SetUserStatusToWBSElement": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      },
+      "UserStatusShortName": {
+       "type": "cds.String",
+       "length": 4,
+       "notNull": true,
+       "@Common.Label": "Status",
+       "@Common.Heading": "Stat",
+       "@Common.QuickInfo": "Individual status of an object (short form)"
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    },
+    "UnlockWBSElementMasterData": {
+     "kind": "action",
+     "params": {
+      "_it": {
+       "type": "$self",
+       "notNull": true
+      }
+     },
+     "returns": {
+      "type": "API_PROJECT_V3.WBSElement",
+      "notNull": true
+     }
+    }
+   },
+   "@Common.Label": "WBS Element data details",
+   "@Common.Messages": {
+    "=": "SAP__Messages"
+   },
+   "@Capabilities.NavigationRestrictions.RestrictedProperties": [
+    {
+     "NavigationProperty": {
+      "=": "_SubWBSElement"
+     },
+     "InsertRestrictions": {
+      "Insertable": true
+     }
+    }
+   ],
+   "@Capabilities.SearchRestrictions.Searchable": false,
+   "@Capabilities.InsertRestrictions.RequiredProperties": [
+    "WBSElementExternalID"
+   ],
+   "@Capabilities.FilterRestrictions.FilterExpressionRestrictions": [
+    {
+     "Property": {
+      "=": "BasicDuration"
+     },
+     "AllowedExpressions": "MultiValue"
+    },
+    {
+     "Property": {
+      "=": "ForecastedDuration"
+     },
+     "AllowedExpressions": "MultiValue"
+    },
+    {
+     "Property": {
+      "=": "ActualDuration"
+     },
+     "AllowedExpressions": "MultiValue"
+    },
+    {
+     "Property": {
+      "=": "FreeDefinedQuantity1"
+     },
+     "AllowedExpressions": "MultiValue"
+    },
+    {
+     "Property": {
+      "=": "FreeDefinedQuantity2"
+     },
+     "AllowedExpressions": "MultiValue"
+    },
+    {
+     "Property": {
+      "=": "FreeDefinedAmount1"
+     },
+     "AllowedExpressions": "MultiValue"
+    },
+    {
+     "Property": {
+      "=": "FreeDefinedAmount2"
+     },
+     "AllowedExpressions": "MultiValue"
+    }
+   ],
+   "@Capabilities.UpdateRestrictions.QueryOptions.SelectSupported": true
+  },
+  "API_PROJECT_V3.WBSElementStatus": {
+   "kind": "entity",
+   "@cds.external": true,
+   "@cds.persistence.skip": true,
+   "elements": {
+    "WBSElementInternalID": {
+     "key": true,
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Common.IsDigitSequence": true,
+     "@Common.Label": "WBS Internal ID",
+     "@Common.Heading": "WBS Elem",
+     "@Common.QuickInfo": "WBS Element"
+    },
+    "StatusCode": {
+     "key": true,
+     "type": "cds.String",
+     "length": 5,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Status",
+     "@Common.Heading": "Stat.",
+     "@Common.QuickInfo": "Object status"
+    },
+    "StatusObject": {
+     "type": "cds.String",
+     "length": 22,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Object number"
+    },
+    "StatusProfile": {
+     "type": "cds.String",
+     "length": 8,
+     "notNull": true,
+     "@Common.IsUpperCase": true,
+     "@Common.Label": "Status Profile",
+     "@Common.Heading": "StatProf"
+    },
+    "StatusIsActive": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true
+    },
+    "IsUserStatus": {
+     "type": "cds.String",
+     "length": 1,
+     "notNull": true
+    },
+    "StatusShortName": {
+     "type": "cds.String",
+     "length": 4,
+     "notNull": true,
+     "@Common.Label": "Status",
+     "@Common.Heading": "Stat",
+     "@Common.QuickInfo": "Individual status of an object (short form)"
+    },
+    "StatusName": {
+     "type": "cds.String",
+     "length": 30,
+     "notNull": true,
+     "@Common.Label": "Status",
+     "@Common.QuickInfo": "Individual Status of an Object"
+    },
+    "_WBSElement": {
+     "type": "cds.Association",
+     "@cds.ambiguous": "missing on condition?",
+     "target": "API_PROJECT_V3.WBSElement",
+     "cardinality": {
+      "max": 1
+     },
+     "keys": []
+    }
+   },
+   "@Common.Label": "WBS Element status",
+   "@Capabilities.NavigationRestrictions.RestrictedProperties": [
+    {
+     "NavigationProperty": {
+      "=": "_WBSElement"
+     },
+     "InsertRestrictions": {
+      "Insertable": true
+     }
+    }
+   ],
+   "@Capabilities.SearchRestrictions.Searchable": false,
+   "@Capabilities.InsertRestrictions.Insertable": false,
+   "@Capabilities.DeleteRestrictions.Deletable": false,
+   "@Capabilities.UpdateRestrictions.Updatable": false,
+   "@Capabilities.UpdateRestrictions.QueryOptions.SelectSupported": true
+  }
+ }
+}
