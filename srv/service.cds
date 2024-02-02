@@ -7,7 +7,7 @@ service Service {
     entity Types       as projection on autoExpand.Types
 
     @readonly
-    entity APIProjects as projection on autoExpand.Projects
+    entity Projects as projection on autoExpand.Projects
 
     @readonly
     entity WBSElements as projection on autoExpand.WBSElements;

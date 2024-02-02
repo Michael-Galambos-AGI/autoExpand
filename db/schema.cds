@@ -1,4 +1,3 @@
-
 using {
     managed,
     cuid
@@ -10,7 +9,7 @@ using {API_PROJECT_V3 as api} from '../srv/external/API_PROJECT_V3';
 namespace autoExpand;
 
 entity Tags : cuid, managed {
-    type     : Association to one Types @mandatory;
+    type    : Association to one Types @mandatory;
     project : Association to one Projects;
 }
 
@@ -20,7 +19,7 @@ entity Types : cuid, managed {
 }
 
 @readonly
-entity Projects as
+entity Projects    as
     projection on api.Project {
         key ProjectInternalID  as ID,
             ProjectDescription as Description,
@@ -46,6 +45,6 @@ entity Projects as
 entity WBSElements as
     projection on api.WBSElement {
         key WBSElementInternalID as ID,
-            ProjectInternalID ,
+            ProjectInternalID,
             WBSDescription
     };

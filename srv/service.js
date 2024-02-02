@@ -23,7 +23,7 @@ class Service extends cds.ApplicationService {
     return new Map(apis.map((api) => [api.name, api]));
   }
 
-  _getRemoteObject(definitions, currentEntity, column) {
+  _getExpandObject(definitions, currentEntity, column) {
     const associationName = column.ref[0];
     const association =
       definitions[currentEntity].associations[associationName];
@@ -37,13 +37,20 @@ class Service extends cds.ApplicationService {
     const isFromRemote = entitySchema.query?.source["@cds.external"];
 
     if (!isFromRemote) {
-      return undefined;
+      return {
+        isRemote: false,
+        associationName: associationName,
+        // associationKey: associationKey,
+        // key: key,
+        entity: entity,
+      };
     }
     // TODO: Test if propper key & multi key
     const key = association.keys[0].ref[0];
     const associationKey = association.keys[0].$generatedFieldName;
     const service = entitySchema.projection.from.ref[0].split(".")[0];
     return {
+      isRemote: true,
       associationName: associationName,
       associationKey: associationKey,
       key: key,
@@ -82,79 +89,85 @@ class Service extends cds.ApplicationService {
 
     if (!columns) return next();
 
-    const remoteObjects = [];
+    const expandObjects = [];
 
     for (let i = 0; i < columns.length; i++) {
-      if (!columns[i].expand) {
-        continue;
-      }
+      if (!columns[i].expand) continue;
 
-      const remoteObject = this._getRemoteObject(
+      const expandObject = this._getExpandObject(
         definitions,
         currentEntity,
         columns[i]
       );
-      if (remoteObject) {
-        remoteObject.index = i;
-        remoteObjects.push(remoteObject);
-      } else if (isFromApi) {
-        // columns.splice(columns.indexOf(columns[i]),1)
-      }
+      if (!isFromApi && !expandObject.isRemote) continue;
+      expandObject.index = i;
+      expandObjects.push(expandObject);
     }
 
-    remoteObjects.forEach((remoteObject) => {
-      this._addId(columns, remoteObject.associationKey);
+    expandObjects.forEach((expandObject) => {
+      if (!expandObject.isRemote) return;
+      this._addId(columns, expandObject.associationKey);
     });
 
     let data;
 
+
+
     if (isFromApi) {
-      // delete req.query.SELECT.columns
+      const selectColumns = columns.filter((column) => !column.ref);
       data = await this.apis
         .get(schemaEntity)
-        .run(SELECT(["*"]).from(definitions[currentEntity]));
+        .run(SELECT(selectColumns).from(definitions[currentEntity]).where());
     } else data = await next();
 
     if (!Array.isArray(data)) {
       data = [data];
     }
 
-    for (let i = 0; i < remoteObjects.length; i++) {
-      const remoteObject = remoteObjects[i];
-      const expandColumns = columns[remoteObject.index].expand;
+    for (let i = 0; i < expandObjects.length; i++) {
+      const expandObject = expandObjects[i];
+      const expandColumns = columns[expandObject.index].expand;
 
-      this._addId(expandColumns, remoteObject.key);
+      if (expandObject.isRemote) {
+        this._addId(expandColumns, expandObject.key);
 
-      const expandIDs = [
-        ...new Set(
-          data.reduce((expandColumn, item) => {
-            if (item[remoteObject.associationKey]) {
-              expandColumn.push(item[remoteObject.associationKey]);
-            }
-            return expandColumn;
-          }, [])
-        ),
-      ];
+        const expandIDs = [
+          ...new Set(
+            data.reduce((expandColumn, item) => {
+              if (item[expandObject.associationKey]) {
+                expandColumn.push(item[expandObject.associationKey]);
+              }
+              return expandColumn;
+            }, [])
+          ),
+        ];
 
-      if (expandIDs.length <= 0) {
-        continue;
-      }
+        if (expandIDs.length <= 0) {
+          continue;
+        }
 
-      const expands = await this.apis.get(remoteObject.service).run(
-        SELECT(expandColumns)
-          .from(remoteObject.entity)
-          .where({ [remoteObject.key]: expandIDs })
-      );
-
-      const mExpands = new Map(expands.map((expand) => [expand.ID, expand]));
-
-      data.forEach((item) => {
-        item[remoteObject.associationName] = mExpands.get(
-          item[remoteObject.associationKey]
+        const expands = await this.apis.get(expandObject.service).run(
+          SELECT(expandColumns)
+            .from(expandObject.entity)
+            .where({ [expandObject.key]: expandIDs })
         );
-        delete item[remoteObject.associationKey];
-      });
+
+        const mExpands = new Map(expands.map((expand) => [expand.ID, expand]));
+
+        data.forEach((item) => {
+          item[expandObject.associationName] = mExpands.get(
+            item[expandObject.associationKey]
+          );
+          delete item[expandObject.associationKey];
+        });
+      } else
+      {
+        this.run( SELECT(expandColumns)
+        .from(expandObject.entity)
+        .where({ [expandObject.associationKey]: "isNotNull" }))
+      }
     }
+    return data;
   }
 }
 module.exports = Service;
