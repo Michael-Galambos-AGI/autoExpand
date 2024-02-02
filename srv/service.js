@@ -3,9 +3,9 @@ const cds = require("@sap/cds");
 class Service extends cds.ApplicationService {
   async init() {
     this.apis = await this._getAPIS();
-    const { Tags, Types } = this.entities;
+    const { Tags, Types, Projects, WBSElements } = this.entities;
 
-    this.on("READ", "*", async (req, next) => {
+    this.on("READ", [Tags, Types, Projects, WBSElements], async (req, next) => {
       return await this._autoExpand(req, next);
     });
 
@@ -35,14 +35,19 @@ class Service extends cds.ApplicationService {
     const entitySchema = definitions[entitySchemaPath];
 
     const isFromRemote = entitySchema.query?.source["@cds.external"];
-
+    //definitions[currentEntity].elements.filter((element) => element.key)
     if (!isFromRemote) {
+      const key =
+        entitySchema.associations[association.on[0].ref[1]].keys[0].ref[0];
+      const associationKey =
+        entitySchema.associations[association.on[0].ref[1]].keys[0]
+          .$generatedFieldName;
       return {
         isRemote: false,
         associationName: associationName,
-        // associationKey: associationKey,
-        // key: key,
-        entity: entity,
+        associationKey: associationKey,
+        key: key,
+        entity: entitySchema,
       };
     }
     // TODO: Test if propper key & multi key
@@ -111,8 +116,6 @@ class Service extends cds.ApplicationService {
 
     let data;
 
-
-
     if (isFromApi) {
       const selectColumns = columns.filter((column) => !column.ref);
       data = await this.apis
@@ -152,7 +155,7 @@ class Service extends cds.ApplicationService {
             .where({ [expandObject.key]: expandIDs })
         );
 
-        const mExpands = new Map(expands.map((expand) => [expand.ID, expand]));
+        const mExpands = new Map(expands.map((expand) => [expand[expandObject.key], expand]));
 
         data.forEach((item) => {
           item[expandObject.associationName] = mExpands.get(
@@ -160,11 +163,19 @@ class Service extends cds.ApplicationService {
           );
           delete item[expandObject.associationKey];
         });
-      } else
-      {
-        this.run( SELECT(expandColumns)
-        .from(expandObject.entity)
-        .where({ [expandObject.associationKey]: "isNotNull" }))
+      } else {
+        const expands = await this.run(
+          SELECT(expandColumns)
+            .from(expandObject.entity)
+            .where(`${[expandObject.associationKey]} IS NOT NULL`)
+        );
+        const mExpands = new Map(expands.map((expand) => [expand[expandObject.associationKey], expand]));
+        data.forEach((item) => {
+          item[expandObject.associationName] = mExpands.get(
+            item[expandObject.key]
+          );
+          delete item[expandObject.associationKey];
+        });
       }
     }
     return data;
