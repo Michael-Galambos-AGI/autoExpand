@@ -37,9 +37,9 @@ class Service extends cds.ApplicationService {
     const isFromRemote = entitySchema.query?.source["@cds.external"];
     //definitions[currentEntity].elements.filter((element) => element.key)
     if (!isFromRemote) {
-      const key =
-        entitySchema.associations[association.on[0].ref[1]].keys[0].ref[0];
       const associationKey =
+        entitySchema.associations[association.on[0].ref[1]].keys[0].ref[0];
+      const key =
         entitySchema.associations[association.on[0].ref[1]].keys[0]
           .$generatedFieldName;
       return {
@@ -96,18 +96,18 @@ class Service extends cds.ApplicationService {
 
     const expandObjects = [];
 
-    for (let i = 0; i < columns.length; i++) {
-      if (!columns[i].expand) continue;
+    columns.forEach((column, idx) => {
+      if (!column.expand) return;
 
       const expandObject = this._getExpandObject(
         definitions,
         currentEntity,
-        columns[i]
+        column
       );
-      if (!isFromApi && !expandObject.isRemote) continue;
-      expandObject.index = i;
+      if (!isFromApi && !expandObject.isRemote) return;
+      expandObject.index = idx;
       expandObjects.push(expandObject);
-    }
+    });
 
     expandObjects.forEach((expandObject) => {
       if (!expandObject.isRemote) return;
@@ -121,7 +121,9 @@ class Service extends cds.ApplicationService {
       data = await this.apis
         .get(schemaEntity)
         .run(SELECT(selectColumns).from(definitions[currentEntity]).where());
-    } else data = await next();
+    } else {
+      data = await next();
+    }
 
     if (!Array.isArray(data)) {
       data = [data];
@@ -154,31 +156,29 @@ class Service extends cds.ApplicationService {
             .from(expandObject.entity)
             .where({ [expandObject.key]: expandIDs })
         );
-
-        const mExpands = new Map(expands.map((expand) => [expand[expandObject.key], expand]));
-
-        data.forEach((item) => {
-          item[expandObject.associationName] = mExpands.get(
-            item[expandObject.associationKey]
-          );
-          delete item[expandObject.associationKey];
-        });
+        this._expand(data, expands, expandObject);
       } else {
         const expands = await this.run(
           SELECT(expandColumns)
             .from(expandObject.entity)
             .where(`${[expandObject.associationKey]} IS NOT NULL`)
         );
-        const mExpands = new Map(expands.map((expand) => [expand[expandObject.associationKey], expand]));
-        data.forEach((item) => {
-          item[expandObject.associationName] = mExpands.get(
-            item[expandObject.key]
-          );
-          delete item[expandObject.associationKey];
-        });
+        this._expand(data, expands, expandObject);
       }
     }
     return data;
+  }
+
+  _expand(data, expands, expandObject) {
+    const mExpands = new Map(
+      expands.map((expand) => [expand[expandObject.key], expand])
+    );
+    data.forEach((item) => {
+      item[expandObject.associationName] = mExpands.get(
+        item[expandObject.associationKey]
+      );
+      delete item[expandObject.associationKey];
+    });
   }
 }
 module.exports = Service;
