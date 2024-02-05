@@ -23,29 +23,6 @@ class Service extends cds.ApplicationService {
     return new Map(apis.map((api) => [api.name, api]));
   }
 
-  async _autoExpand(req, next) {
-    const columns = req.query.SELECT.columns
-    const currentEntityPath = cds.context.path
-    const definitions = cds.model.definitions;
-
-    let oEntity = definitions[currentEntityPath];
-    while (oEntity.projection) {
-      let sParentEntityName = oEntity.projection.from.ref[0];
-      oEntity = cds.model.definitions[sParentEntityName];
-    }
-    const schemaEntity = oEntity.name.split(".")[0];
-    const isFromApi = this.apis.has(schemaEntity);
-
-    if (isFromApi && !columns) {
-      return await this.apis.get(schemaEntity).run(req.query);
-    }
-
-    if (!columns) return next();
-
-
-    this._autoExpandColumn(columns,currentEntityPath,isFromApi)
-  }
-
   _getExpandObject(definitions, currentEntity, column, isFromApi) {
     const associationName = column.ref[0];
     const association =
@@ -99,9 +76,24 @@ class Service extends cds.ApplicationService {
     }
   }
 
-  async _autoExpandColumn(columns, currentEntityPath, isFromApi) {
+  async _autoExpand(req, next) {
+    const columns = req.query.SELECT.columns;
 
     const definitions = cds.model.definitions;
+    const currentEntity = cds.context.path;
+
+    let oEntity = definitions[currentEntity];
+    while (oEntity.projection) {
+      let sParentEntityName = oEntity.projection.from.ref[0];
+      oEntity = cds.model.definitions[sParentEntityName];
+    }
+    const schemaEntity = oEntity.name.split(".")[0];
+    const isFromApi = this.apis.has(schemaEntity);
+
+    if (isFromApi && !columns)
+      return await this.apis.get(schemaEntity).run(req.query);
+
+    if (!columns) return next();
 
     const expandObjects = [];
 
@@ -110,11 +102,11 @@ class Service extends cds.ApplicationService {
 
       const expandObject = this._getExpandObject(
         definitions,
-        currentEntityPath,
+        currentEntity,
         column,
         isFromApi
       );
-      if (!expandObject) return;
+      if (!expandObject || (!isFromApi && !expandObject.isRemote)) return;
       expandObject.index = idx;
       expandObjects.push(expandObject);
     });
@@ -130,7 +122,7 @@ class Service extends cds.ApplicationService {
       const selectColumns = columns.filter((column) => !column.ref);
       data = await this.apis
         .get(schemaEntity)
-        .run(SELECT(selectColumns).from(definitions[currentEntityPath]).where());
+        .run(SELECT(selectColumns).from(definitions[currentEntity]).where());
     } else {
       data = await next();
     }
