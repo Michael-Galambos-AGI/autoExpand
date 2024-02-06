@@ -23,91 +23,60 @@ class Service extends cds.ApplicationService {
     return new Map(apis.map((api) => [api.name, api]));
   }
 
-  _getExpandObject(definitions, currentEntity, column, isFromApi) {
-    const associationName = column.ref[0];
-    const association =
-      definitions[currentEntity].associations[associationName];
-
-    const expandEntityName = association.target;
-    const entity = definitions[expandEntityName];
-
-    const entitySchemaPath = entity.projection.from.ref[0];
-    const entitySchema = definitions[entitySchemaPath];
-
-    const isFromRemote = entitySchema.query?.source["@cds.external"];
-    //definitions[currentEntity].elements.filter((element) => element.key)
-    if (!isFromRemote) {
-      if (!isFromApi) return undefined;
-      const associationKey =
-        entitySchema.associations[association.on[0].ref[1]].keys[0].ref[0];
-      const key =
-        entitySchema.associations[association.on[0].ref[1]].keys[0]
-          .$generatedFieldName;
-      return {
-        isRemote: false,
-        associationName: associationName,
-        associationKey: associationKey,
-        key: key,
-        entity: entitySchema,
-      };
-    }
-    // TODO: Test if propper key & multi key
-    const key = association.keys[0].ref[0];
-    const associationKey = association.keys[0].$generatedFieldName;
-    const service = entitySchema.projection.from.ref[0].split(".")[0];
-    return {
-      isRemote: true,
-      associationName: associationName,
-      associationKey: associationKey,
-      key: key,
-      entity: entity,
-      service: service,
-    };
-  }
-
-  _addId(columns, id) {
-    const allSelected = columns.indexOf("*") !== -1;
-    const idSelected = columns.find(
-      (column) => column.ref && column.ref.find((ref) => ref == id)
-    );
-
-    if (!allSelected && !idSelected) {
-      columns.push({ ref: [id] });
-    }
-  }
-
   async _autoExpand(req, next) {
     const columns = req.query.SELECT.columns;
-
+    const currentEntityPath = cds.context.path;
     const definitions = cds.model.definitions;
-    const currentEntity = cds.context.path;
 
-    let oEntity = definitions[currentEntity];
-    while (oEntity.projection) {
-      let sParentEntityName = oEntity.projection.from.ref[0];
-      oEntity = cds.model.definitions[sParentEntityName];
-    }
-    const schemaEntity = oEntity.name.split(".")[0];
+    const schemaEntity = this._getSchemaEntity(definitions[currentEntityPath]);
     const isFromApi = this.apis.has(schemaEntity);
+    let data;
+    if (isFromApi) {
+      const selectColumns = columns.filter((column) => !column.ref);
+      data = await this.apis
+        .get(schemaEntity)
+        .run(
+          SELECT(selectColumns).from(definitions[currentEntityPath]).where()
+        );
+    } else data = await next();
+    if (!columns) return data;
+    if (!Array.isArray(data)) {
+      data = [data];
+    }
+    columns.forEach((column) => {
+      if (column.expand) column.parentEntityPath = currentEntityPath;
+    });
 
-    if (isFromApi && !columns)
-      return await this.apis.get(schemaEntity).run(req.query);
+    await this._autoExpandColumns(data, columns);
+    return data;
+  }
 
-    if (!columns) return next();
-
+  async _autoExpandColumns(data, columns) {
+    const definitions = cds.model.definitions;
     const expandObjects = [];
-
+    const nextExpands = [];
     columns.forEach((column, idx) => {
       if (!column.expand) return;
-
+      column.path ??= [];
+      const schemaEntity = this._getSchemaEntity(
+        definitions[column.parentEntityPath]
+      );
+      const isFromApi = this.apis.has(schemaEntity);
       const expandObject = this._getExpandObject(
         definitions,
-        currentEntity,
-        column,
-        isFromApi
+        column.parentEntityPath,
+        column
       );
-      if (!expandObject || (!isFromApi && !expandObject.isRemote)) return;
+      column.expand.forEach((col) => {
+        if (!col.expand) return;
+        col.parentEntityPath = expandObject.parentEntityPath;
+        col.path = [...column.path, column.ref[0]];
+        col.path.push();
+        nextExpands.push(col);
+      });
+      if (!expandObject.isRemote && !isFromApi) return;
       expandObject.index = idx;
+      expandObject.path = column.path;
       expandObjects.push(expandObject);
     });
 
@@ -116,20 +85,6 @@ class Service extends cds.ApplicationService {
       this._addId(columns, expandObject.associationKey);
     });
 
-    let data;
-
-    if (isFromApi) {
-      const selectColumns = columns.filter((column) => !column.ref);
-      data = await this.apis
-        .get(schemaEntity)
-        .run(SELECT(selectColumns).from(definitions[currentEntity]).where());
-    } else {
-      data = await next();
-    }
-
-    if (!Array.isArray(data)) {
-      data = [data];
-    }
     const aExpands = [];
 
     for (let i = 0; i < expandObjects.length; i++) {
@@ -142,6 +97,11 @@ class Service extends cds.ApplicationService {
         const expandIDs = [
           ...new Set(
             data.reduce((expandColumn, item) => {
+              expandObject.path.forEach((element) => {
+                if (item[element]) {
+                  item = item[element];
+                }
+              });
               if (item[expandObject.associationKey]) {
                 expandColumn.push(item[expandObject.associationKey]);
               }
@@ -161,23 +121,94 @@ class Service extends cds.ApplicationService {
             .where({ [expandObject.key]: expandIDs })
         );
       } else {
-        pExpand = this.run(
-          SELECT(expandColumns)
-            .from(expandObject.entity)
-            .where(`${[expandObject.associationKey]} IS NOT NULL`)
-        );
+        //const selectColumns = expandColumns.filter((column) => !column.ref);
+        pExpand = this.run(SELECT(expandColumns).from(expandObject.entity));
       }
       aExpands.push(pExpand);
     }
 
     await Promise.all(aExpands).then((res) => {
       for (let i = 0; i < res.length; i++) {
-        if (!res) continue;
+        if (!res[i]) continue;
         this._expand(data, res[i], expandObjects[i]);
       }
     });
 
+    if (nextExpands.length !== 0) {
+      await this._autoExpandColumns(data, nextExpands);
+    }
     return data;
+  }
+
+  _getExpandObject(definitions, currentEntity, column) {
+    const associationName = column.ref[0];
+    const association =
+      definitions[currentEntity].associations[associationName];
+
+    const expandEntityName = association.target;
+    const entity = definitions[expandEntityName];
+
+    const entitySchemaPath = entity.projection.from.ref[0];
+    const entitySchema = definitions[entitySchemaPath];
+
+    const isFromRemote = entitySchema.query?.source["@cds.external"];
+
+    const service = entitySchema.projection?.from?.ref[0]?.split(".")[0];
+
+    let key;
+    let associationKey;
+    if (association.keys) {
+      key = association.keys[0].ref[0];
+      associationKey = association.keys[0].$generatedFieldName;
+    } else {
+      associationKey =
+        entitySchema.associations[association.on[0].ref[1]].keys[0].ref[0];
+      key =
+        entitySchema.associations[association.on[0].ref[1]].keys[0]
+          .$generatedFieldName;
+    }
+
+    //definitions[currentEntity].elements.filter((element) => element.key)
+    if (!isFromRemote) {
+      return {
+        isRemote: false,
+        associationName: associationName,
+        associationKey: associationKey,
+        key: key,
+        entity: entitySchema,
+        parentEntityPath: expandEntityName,
+      };
+    }
+    // TODO: Test if propper key & multi key
+
+    return {
+      isRemote: true,
+      associationName: associationName,
+      associationKey: associationKey,
+      key: key,
+      entity: entity,
+      service: service,
+      parentEntityPath: expandEntityName,
+    };
+  }
+
+  _addId(columns, id) {
+    const allSelected = columns.indexOf("*") !== -1;
+    const idSelected = columns.find(
+      (column) => column.ref && column.ref.find((ref) => ref == id)
+    );
+
+    if (!allSelected && !idSelected) {
+      columns.push({ ref: [id] });
+    }
+  }
+
+  _getSchemaEntity(entity) {
+    while (entity.projection) {
+      let sParentEntityName = entity.projection.from.ref[0];
+      entity = cds.model.definitions[sParentEntityName];
+    }
+    return entity.name.split(".")[0];
   }
 
   _expand(data, expands, expandObject) {
@@ -185,10 +216,23 @@ class Service extends cds.ApplicationService {
       expands.map((expand) => [expand[expandObject.key], expand])
     );
     data.forEach((item) => {
-      item[expandObject.associationName] = mExpands.get(
-        item[expandObject.associationKey]
-      );
-      delete item[expandObject.associationKey];
+      expandObject.path.forEach((element) => {
+        item = item[element];
+      });
+      if (Array.isArray(item)) {
+        item.forEach((it) => {
+          it[expandObject.associationName] = mExpands.get(
+            it[expandObject.associationKey]
+          );
+          delete it[expandObject.associationKey];
+        });
+      } else {
+        if (item[expandObject.associationKey]) return;
+        item[expandObject.associationName] = mExpands.get(
+          item[expandObject.associationKey]
+        );
+        delete item[expandObject.associationKey];
+      }
     });
   }
 }
