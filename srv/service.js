@@ -32,7 +32,7 @@ class Service extends cds.ApplicationService {
     const isFromApi = this.apis.has(schemaEntity);
     let data;
     if (isFromApi) {
-      const selectColumns = columns.filter((column) => !column.ref);
+      const selectColumns = columns?.filter((column) => !column.ref);
       data = await this.apis
         .get(schemaEntity)
         .run(
@@ -96,15 +96,19 @@ class Service extends cds.ApplicationService {
 
         const expandIDs = [
           ...new Set(
-            data.reduce((expandColumn, item) => {
+            data.reduce((expandColumn, items) => {
               expandObject.path.forEach((element) => {
-                if (item[element]) {
-                  item = item[element];
+                if (items[element]) {
+                  items = items[element];
                 }
               });
-              if (item[expandObject.associationKey]) {
-                expandColumn.push(item[expandObject.associationKey]);
-              }
+              if (!Array.isArray(items)) items = [items];
+              items.forEach((item) => {
+                if (item[expandObject.associationKey]) {
+                  expandColumn.push(item[expandObject.associationKey]);
+                }
+              });
+
               return expandColumn;
             }, [])
           ),
@@ -215,24 +219,20 @@ class Service extends cds.ApplicationService {
     const mExpands = new Map(
       expands.map((expand) => [expand[expandObject.key], expand])
     );
-    data.forEach((item) => {
+    data.forEach((items) => {
       expandObject.path.forEach((element) => {
-        item = item[element];
+        if (items && items[element]) {
+          items = items[element];
+        } else items = undefined
       });
-      if (Array.isArray(item)) {
-        item.forEach((it) => {
-          it[expandObject.associationName] = mExpands.get(
-            it[expandObject.associationKey]
-          );
-          delete it[expandObject.associationKey];
-        });
-      } else {
-        if (item[expandObject.associationKey]) return;
+      if (!items) return
+      if (!Array.isArray(items)) items = [items];
+      items.forEach((item) => {
         item[expandObject.associationName] = mExpands.get(
           item[expandObject.associationKey]
         );
         delete item[expandObject.associationKey];
-      }
+      });
     });
   }
 }
