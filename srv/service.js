@@ -3,11 +3,22 @@ const cds = require("@sap/cds");
 class Service extends cds.ApplicationService {
   async init() {
     this.apis = await this._getAPIS();
-    const { Tags, Types, Projects, WBSElements } = this.entities;
+    const {
+      Tags,
+      Types,
+      Projects,
+      WBSElements,
+      Customer,
+      CustomersProjects,
+    } = this.entities;
 
-    this.on("READ", [Tags, Types, Projects, WBSElements], async (req, next) => {
-      return await this._autoExpand(req, next);
-    });
+    this.on(
+      "READ",
+      [Tags, Types, Projects, WBSElements, Customer, CustomersProjects],
+      async (req, next) => {
+        return await this._autoExpand(req, next);
+      }
+    );
 
     return super.init();
   }
@@ -27,10 +38,11 @@ class Service extends cds.ApplicationService {
     const columns = req.query.SELECT.columns;
     const currentEntityPath = cds.context.path;
     const definitions = cds.model.definitions;
-
     const schemaEntity = this._getSchemaEntity(definitions[currentEntityPath]);
     const isFromApi = this.apis.has(schemaEntity);
     let data;
+
+
     if (isFromApi) {
       const selectColumns = columns?.filter((column) => !column.ref);
       data = await this.apis
@@ -39,12 +51,15 @@ class Service extends cds.ApplicationService {
           SELECT(selectColumns).from(definitions[currentEntityPath]).where()
         );
     } else data = await next();
+
     if (!columns) return data;
+
     if (!Array.isArray(data)) {
       data = [data];
     }
+    
     columns.forEach((column) => {
-      if (column.expand) column.parentEntityPath = currentEntityPath;
+      if (column.expand) column.previousEntityPath = currentEntityPath;
     });
 
     await this._autoExpandColumns(data, columns);
@@ -59,20 +74,20 @@ class Service extends cds.ApplicationService {
       if (!column.expand) return;
       column.path ??= [];
       const schemaEntity = this._getSchemaEntity(
-        definitions[column.parentEntityPath]
+        definitions[column.previousEntityPath]
       );
       const isFromApi = this.apis.has(schemaEntity);
       const expandObject = this._getExpandObject(
         definitions,
-        column.parentEntityPath,
+        column.previousEntityPath,
         column
       );
-      column.expand.forEach((col) => {
-        if (!col.expand) return;
-        col.parentEntityPath = expandObject.parentEntityPath;
-        col.path = [...column.path, column.ref[0]];
-        col.path.push();
-        nextExpands.push(col);
+      column.expand.forEach((nextColumn) => {
+        if (!nextColumn.expand) return;
+        nextColumn.previousEntityPath = expandObject.previousEntityPath;
+        nextColumn.path = [...column.path, column.ref[0]];
+        nextColumn.path.push();
+        nextExpands.push(nextColumn);
       });
       if (!expandObject.isRemote && !isFromApi) return;
       expandObject.index = idx;
@@ -85,18 +100,19 @@ class Service extends cds.ApplicationService {
       this._addId(columns, expandObject.associationKey);
     });
 
-    const aExpands = [];
+    const expands = [];
 
     for (let i = 0; i < expandObjects.length; i++) {
       const expandObject = expandObjects[i];
       const expandColumns = columns[expandObject.index].expand;
-      let pExpand;
+      let expand;
       if (expandObject.isRemote) {
         this._addId(expandColumns, expandObject.key);
 
         const expandIDs = [
           ...new Set(
             data.reduce((expandColumn, items) => {
+              // export into
               expandObject.path.forEach((element) => {
                 if (items[element]) {
                   items = items[element];
@@ -115,23 +131,23 @@ class Service extends cds.ApplicationService {
         ];
 
         if (expandIDs.length <= 0) {
-          aExpands.push(null);
+          expands.push(null);
           continue;
         }
-
-        pExpand = this.apis.get(expandObject.service).run(
-          SELECT(expandColumns)
+        const selectColumns = expandColumns.filter((column) => !column.ref);
+        expand = this.apis.get(expandObject.service).run(
+          SELECT(selectColumns)
             .from(expandObject.entity)
             .where({ [expandObject.key]: expandIDs })
         );
       } else {
-        //const selectColumns = expandColumns.filter((column) => !column.ref);
-        pExpand = this.run(SELECT(expandColumns).from(expandObject.entity));
+        const selectColumns = expandColumns.filter((column) => !column.ref);
+        expand = this.run(SELECT(selectColumns).from(expandObject.entity));
       }
-      aExpands.push(pExpand);
+      expands.push(expand);
     }
 
-    await Promise.all(aExpands).then((res) => {
+    await Promise.all(expands).then((res) => {
       for (let i = 0; i < res.length; i++) {
         if (!res[i]) continue;
         this._expand(data, res[i], expandObjects[i]);
@@ -152,10 +168,12 @@ class Service extends cds.ApplicationService {
     const expandEntityName = association.target;
     const entity = definitions[expandEntityName];
 
+    // use get schemaentity function
+
     const entitySchemaPath = entity.projection.from.ref[0];
     const entitySchema = definitions[entitySchemaPath];
 
-    const isFromRemote = entitySchema.query?.source["@cds.external"];
+    const isFromRemote = entitySchema.query?.source["@cds.external"] || false;
 
     const service = entitySchema.projection?.from?.ref[0]?.split(".")[0];
 
@@ -165,6 +183,7 @@ class Service extends cds.ApplicationService {
       key = association.keys[0].ref[0];
       associationKey = association.keys[0].$generatedFieldName;
     } else {
+      //on is wrong if $self = ... try consult hannah
       associationKey =
         entitySchema.associations[association.on[0].ref[1]].keys[0].ref[0];
       key =
@@ -180,7 +199,7 @@ class Service extends cds.ApplicationService {
         associationKey: associationKey,
         key: key,
         entity: entitySchema,
-        parentEntityPath: expandEntityName,
+        previousEntityPath: expandEntityName,
       };
     }
     // TODO: Test if propper key & multi key
@@ -192,7 +211,7 @@ class Service extends cds.ApplicationService {
       key: key,
       entity: entity,
       service: service,
-      parentEntityPath: expandEntityName,
+      previousEntityPath: expandEntityName,
     };
   }
 
@@ -223,9 +242,9 @@ class Service extends cds.ApplicationService {
       expandObject.path.forEach((element) => {
         if (items && items[element]) {
           items = items[element];
-        } else items = undefined
+        } else items = undefined;
       });
-      if (!items) return
+      if (!items) return;
       if (!Array.isArray(items)) items = [items];
       items.forEach((item) => {
         item[expandObject.associationName] = mExpands.get(
