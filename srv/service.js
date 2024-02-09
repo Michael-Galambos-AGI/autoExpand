@@ -184,12 +184,15 @@ class Service extends cds.ApplicationService {
       key = association.keys[0].ref[0];
       associationKey = association.keys[0].$generatedFieldName;
     } else {
+      let idx = 0;
+      if (association.on[0].ref[0] === "$self") {
+        idx = 2;
+      }
+      const associationKeys =
+        entitySchema.associations[association.on[idx].ref[1]].keys[0];
       //on[0] is wrong if $self = ... try consult hannah
-      associationKey =
-        entitySchema.associations[association.on[0].ref[1]].keys[0].ref[0];
-      key =
-        entitySchema.associations[association.on[0].ref[1]].keys[0]
-          .$generatedFieldName;
+      associationKey = associationKeys.ref[0];
+      key = associationKeys.$generatedFieldName;
     }
     if (!isFromRemote) {
       return {
@@ -245,8 +248,8 @@ class Service extends cds.ApplicationService {
       mExpands.set(expand[expandObject.key], [expand]);
     });
     mExpands.forEach((expand, key) => {
-        if (expand.length === 1) mExpands.set(key, expand[0])
-    })
+      if (expand.length === 1) mExpands.set(key, expand[0]);
+    });
     data.forEach((items) => {
       if (!Array.isArray(items)) items = [items];
       items = this._findItem(items, expandObject.path);

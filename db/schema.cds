@@ -34,7 +34,7 @@ entity Projects    as
         key ProjectInternalID  as ID,
             ProjectDescription as Description,
             CompanyCode,
-            Tags              : Association to many Tags on Tags.project = $self,
+            Tags              : Association to many Tags on $self = Tags.project,
             customersprojects : Association to many CustomersProjects on customersprojects.project = $self
     }
 
