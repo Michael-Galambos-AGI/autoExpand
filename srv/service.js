@@ -38,10 +38,11 @@ class Service extends cds.ApplicationService {
     const columns = req.query.SELECT.columns;
     const currentEntityPath = cds.context.path;
     const definitions = cds.model.definitions;
-    const schemaEntity = this._getSchemaEntity(definitions[currentEntityPath]);
+    const schemaEntity = this._getSchemaEntity(
+      definitions[currentEntityPath]
+    ).name.split(".")[0];
     const isFromApi = this.apis.has(schemaEntity);
     let data;
-
 
     if (isFromApi) {
       const selectColumns = columns?.filter((column) => !column.ref);
@@ -57,12 +58,16 @@ class Service extends cds.ApplicationService {
     if (!Array.isArray(data)) {
       data = [data];
     }
-    
+
     columns.forEach((column) => {
-      if (column.expand) column.previousEntityPath = currentEntityPath;
+      if (column.expand) {
+        column.previousEntityPath = currentEntityPath;
+        column.hadRemote = isFromApi;
+        column.path = [];
+      }
     });
 
-    await this._autoExpandColumns(data, columns);
+    await this._autoExpandColumns(data, columns, isFromApi);
     return data;
   }
 
@@ -72,24 +77,25 @@ class Service extends cds.ApplicationService {
     const nextExpands = [];
     columns.forEach((column, idx) => {
       if (!column.expand) return;
-      column.path ??= [];
       const schemaEntity = this._getSchemaEntity(
         definitions[column.previousEntityPath]
-      );
-      const isFromApi = this.apis.has(schemaEntity);
+      ).name.split(".")[0];
+      if (this.apis.has(schemaEntity)) column.hadRemote = true;
       const expandObject = this._getExpandObject(
         definitions,
         column.previousEntityPath,
         column
       );
+      if (expandObject.isRemote) column.hadRemote = true;
+
       column.expand.forEach((nextColumn) => {
         if (!nextColumn.expand) return;
         nextColumn.previousEntityPath = expandObject.previousEntityPath;
         nextColumn.path = [...column.path, column.ref[0]];
-        nextColumn.path.push();
+        nextColumn.hadRemote = column.hadRemote;
         nextExpands.push(nextColumn);
       });
-      if (!expandObject.isRemote && !isFromApi) return;
+      if (!column.hadRemote) return;
       expandObject.index = idx;
       expandObject.path = column.path;
       expandObjects.push(expandObject);
@@ -112,15 +118,11 @@ class Service extends cds.ApplicationService {
         const expandIDs = [
           ...new Set(
             data.reduce((expandColumn, items) => {
-              // export into
-              expandObject.path.forEach((element) => {
-                if (items[element]) {
-                  items = items[element];
-                }
-              });
               if (!Array.isArray(items)) items = [items];
+              items = this._findItem(items, expandObject.path);
+
               items.forEach((item) => {
-                if (item[expandObject.associationKey]) {
+                if (item && item[expandObject.associationKey]) {
                   expandColumn.push(item[expandObject.associationKey]);
                 }
               });
@@ -134,6 +136,7 @@ class Service extends cds.ApplicationService {
           expands.push(null);
           continue;
         }
+
         const selectColumns = expandColumns.filter((column) => !column.ref);
         expand = this.apis.get(expandObject.service).run(
           SELECT(selectColumns)
@@ -168,8 +171,6 @@ class Service extends cds.ApplicationService {
     const expandEntityName = association.target;
     const entity = definitions[expandEntityName];
 
-    // use get schemaentity function
-
     const entitySchemaPath = entity.projection.from.ref[0];
     const entitySchema = definitions[entitySchemaPath];
 
@@ -183,15 +184,13 @@ class Service extends cds.ApplicationService {
       key = association.keys[0].ref[0];
       associationKey = association.keys[0].$generatedFieldName;
     } else {
-      //on is wrong if $self = ... try consult hannah
+      //on[0] is wrong if $self = ... try consult hannah
       associationKey =
         entitySchema.associations[association.on[0].ref[1]].keys[0].ref[0];
       key =
         entitySchema.associations[association.on[0].ref[1]].keys[0]
           .$generatedFieldName;
     }
-
-    //definitions[currentEntity].elements.filter((element) => element.key)
     if (!isFromRemote) {
       return {
         isRemote: false,
@@ -202,8 +201,6 @@ class Service extends cds.ApplicationService {
         previousEntityPath: expandEntityName,
       };
     }
-    // TODO: Test if propper key & multi key
-
     return {
       isRemote: true,
       associationName: associationName,
@@ -231,28 +228,54 @@ class Service extends cds.ApplicationService {
       let sParentEntityName = entity.projection.from.ref[0];
       entity = cds.model.definitions[sParentEntityName];
     }
-    return entity.name.split(".")[0];
+    return entity;
   }
 
   _expand(data, expands, expandObject) {
-    const mExpands = new Map(
-      expands.map((expand) => [expand[expandObject.key], expand])
-    );
+    const mExpands = new Map();
+
+    expands.forEach((expand) => {
+      if (mExpands.has(expand[expandObject.key])) {
+        mExpands.set(expand[expandObject.key], [
+          ...mExpands.get(expand[expandObject.key]),
+          expand,
+        ]);
+        return;
+      }
+      mExpands.set(expand[expandObject.key], [expand]);
+    });
+    mExpands.forEach((expand, key) => {
+        if (expand.length === 1) mExpands.set(key, expand[0])
+    })
     data.forEach((items) => {
-      expandObject.path.forEach((element) => {
-        if (items && items[element]) {
-          items = items[element];
-        } else items = undefined;
-      });
-      if (!items) return;
       if (!Array.isArray(items)) items = [items];
+      items = this._findItem(items, expandObject.path);
+
+      if (!items) return;
       items.forEach((item) => {
+        if (!item) return;
         item[expandObject.associationName] = mExpands.get(
           item[expandObject.associationKey]
         );
-        delete item[expandObject.associationKey];
       });
     });
+  }
+
+  _findItem(items, path) {
+    if (path.length === 0) return items;
+    items.forEach((item, i) => {
+      if (!item[path[0]]) return;
+      if (Array.isArray(item[path[0]])) {
+        item[path[0]].forEach((item) => {
+          items.push(item);
+        });
+        items.splice(i, 1);
+      } else {
+        items[i] = item[path[0]];
+      }
+    });
+    items = this._findItem(items, path.slice(1));
+    return items;
   }
 }
 module.exports = Service;
