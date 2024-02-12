@@ -19,8 +19,9 @@ entity Types : cuid {
 }
 
 entity Customers : cuid {
-    customersprojects : Association to many CustomersProjects
-                            on customersprojects.customer = $self
+    key IDTWO             : UUID;
+        customersprojects : Association to many CustomersProjects
+                                on customersprojects.customer = $self
 }
 
 entity CustomersProjects : cuid {
@@ -32,6 +33,7 @@ entity CustomersProjects : cuid {
 entity Projects    as
     projection on api.Project {
         key ProjectInternalID  as ID,
+        key ProjectExternalID  as externalID,
             ProjectDescription as Description,
             CompanyCode,
             Tags              : Association to many Tags on $self = Tags.project,

@@ -21,8 +21,12 @@
     "requires": {
       "API_PROJECT_V3": {
         "kind": "odata",
-        "model": "srv/external/API_PROJECT_V3"
+        "model": "srv/external/API_PROJECT_V3",
+        "csrf": true,
+        "csrfInBatch": true
+
       }
     }
   }
 }
+
