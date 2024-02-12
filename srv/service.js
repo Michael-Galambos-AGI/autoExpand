@@ -46,10 +46,13 @@ class Service extends cds.ApplicationService {
 
     if (isFromApi) {
       const selectColumns = columns?.filter((column) => !column.ref);
+      const where = req.query.SELECT.where;
       data = await this.apis
         .get(schemaEntity)
         .run(
-          SELECT(selectColumns).from(definitions[currentEntityPath]).where()
+          SELECT(selectColumns)
+            .from(definitions[currentEntityPath])
+            .where(where)
         );
     } else data = await next();
 

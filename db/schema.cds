@@ -23,9 +23,9 @@ entity Customers : cuid {
                             on customersprojects.customer = $self
 }
 
-entity CustomersProjects : cuid {
-    customer : Composition of one Customers;
-    project  : Composition of one Projects
+entity CustomersProjects {
+    key customer : Composition of one Customers;
+    key project  : Composition of one Projects;
 }
 
 @readonly
