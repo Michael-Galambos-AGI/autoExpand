@@ -242,25 +242,22 @@ class Service extends cds.ApplicationService {
         return keys;
       }, []);
     }
-    if (!isFromRemote) {
-      return {
-        isRemote: false,
-        associationName: associationName,
-        associationKey: associationKey,
-        key: key,
-        entity: entitySchema,
-        previousEntityPath: expandEntityName,
-      };
-    }
-    return {
-      isRemote: true,
+
+    const result = {
+      isRemote: isFromRemote,
       associationName: associationName,
       associationKey: associationKey,
       key: key,
-      entity: entity,
-      service: service,
       previousEntityPath: expandEntityName,
+      entity: entitySchema,
     };
+
+    if (isFromRemote) {
+      result.entity = entity;
+      result.service = service;
+    }
+    
+    return result;
   }
 
   _addId(columns, keys) {
@@ -343,5 +340,4 @@ class Service extends cds.ApplicationService {
     return items;
   }
 }
-
 module.exports = Service;
