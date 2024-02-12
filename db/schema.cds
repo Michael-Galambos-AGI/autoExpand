@@ -1,5 +1,4 @@
 using {
-    managed,
     cuid
 } from '@sap/cds/common';
 

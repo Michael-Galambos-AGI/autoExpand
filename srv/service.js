@@ -333,7 +333,7 @@ class Service extends cds.ApplicationService {
         item[path[0]].forEach((item) => {
           items.push(item);
         });
-        
+
         items.splice(i, 1);
       } else {
         items[i] = item[path[0]];
@@ -343,4 +343,5 @@ class Service extends cds.ApplicationService {
     return items;
   }
 }
+
 module.exports = Service;
