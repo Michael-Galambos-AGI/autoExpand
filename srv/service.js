@@ -66,26 +66,31 @@ class Service extends cds.ApplicationService {
 
     if (!Array.isArray(data)) data = [data];
 
-    for (const column of columns) {
-      if (column.expand) {
-        column.previousEntityPath = currentEntityPath;
-        column.hadRemote = isFromApi;
-        column.path = [];
+    for (let i = columns.length - 1; i >= 0; i--) {
+      if (!columns[i].expand) {
+        columns.splice(i, 1);
+        continue;
+      }
+      columns[i].previousEntityPath = currentEntityPath;
+      columns[i].hadRemote = isFromApi;
+      if (Array.isArray(data)) {
+        columns[i].data = data;
+      } else {
+        columns[i].data = [data];
       }
     }
 
-    await this._autoExpandColumns(data, columns, req);
+    await this._autoExpandColumns(columns, req);
     return data;
   }
 
-  async _autoExpandColumns(data, columns, req) {
+  async _autoExpandColumns(columns, req) {
     const definitions = cds.model.definitions;
     const expandObjects = [];
     const nextExpands = [];
 
-    for (const [i, column] of columns.entries()) {
-      if (!column.expand) continue;
-
+    for (let i = 0; i < columns.length; i++) {
+      const column = columns[i];
       const schemaEntity = this._getSchemaEntity(
         definitions[column.previousEntityPath]
       ).name.split(".")[0];
@@ -99,17 +104,35 @@ class Service extends cds.ApplicationService {
 
       if (expandObject.isRemote) column.hadRemote = true;
 
+      if (column.path) {
+        const items = [];
+        for (const item of column.data) {
+          if (!item[column.path]) continue;
+          if (Array.isArray(item[column.path])) {
+            for (const element of item[column.path]) {
+              items.push(element);
+            }
+            continue;
+          }
+          items.push(item[column.path]);
+        }
+        column.data = items;
+      }
+
       for (const nextColumn of column.expand) {
         if (!nextColumn.expand) continue;
         nextColumn.previousEntityPath = expandObject.previousEntityPath;
-        nextColumn.path = [...column.path, column.ref[0]];
+        nextColumn.path = column.ref[0];
         nextColumn.hadRemote = column.hadRemote;
+        nextColumn.data = column.data;
+
         nextExpands.push(nextColumn);
       }
 
       if (!column.hadRemote) continue;
       expandObject.index = i;
       expandObject.path = column.path;
+      expandObject.data = column.data;
       expandObjects.push(expandObject);
     }
 
@@ -118,23 +141,23 @@ class Service extends cds.ApplicationService {
       this._addId(columns, expandObject.associationKeys);
     }
 
-    for (const [i, expandObject] of expandObjects.entries()) {
+    for (let i = expandObjects.length - 1; i >= 0; i--) {
+      const expandObject = expandObjects[i];
       const expandColumns = columns[expandObject.index].expand;
+
       this._addId(expandColumns, expandObject.keys);
+
       let j = 0;
-      const expandKeys = data
+      const expandKeys = expandObject.data
         .reduce((expandColumn, items) => {
           if (!Array.isArray(items)) items = [items];
-          items = this._findItem(items, expandObject.path);
-
           for (const item of items) {
             expandColumn[j] ??= [];
-
-            expandObject.associationKeys.forEach((key) => {
+            for (const key of expandObject.associationKeys) {
               if (item && item[key]) {
                 expandColumn[j].push(item[key]);
               }
-            });
+            }
             j++;
           }
           return expandColumn;
@@ -186,12 +209,10 @@ class Service extends cds.ApplicationService {
       let lastWhere = where;
       let columns = expandObject.expandColumns;
 
-      for (const [i, expandKey] of expandObject.expandKeys.entries()) {
-        for (const [
-          j,
-          expandKeyName,
-        ] of expandObject.expandKeyNames.entries()) {
-          lastWhere[expandKeyName] = expandKey[j];
+      for (let i = 0; i < expandObject.expandKeys.length; i++) {
+        for (let j = 0; j < expandObject.expandKeyNames.length; j++) {
+          lastWhere[expandObject.expandKeyNames[j]] =
+            expandObject.expandKeys[i][j];
         }
         if (expandObject.expandKeys[i + 1]) {
           lastWhere.or = {};
@@ -215,23 +236,20 @@ class Service extends cds.ApplicationService {
     try {
       res = await Promise.all(expands);
     } catch (e) {
-      data = { error: e };
       return req.reject();
     }
 
-    for (const [i, key] of expandKeys.entries()) {
-      mExpandObjects.set(key, res[i]);
+    for (let i = 0; i < expandKeys.length; i++) {
+      mExpandObjects.set(expandKeys[i], res[i]);
     }
 
     for (const expandObject of expandObjects) {
-      this._expand(data, mExpandObjects.get(expandObject.entity), expandObject);
+      this._expand(mExpandObjects.get(expandObject.entity), expandObject);
     }
 
     if (nextExpands.length !== 0) {
-      await this._autoExpandColumns(data, nextExpands, req);
+      await this._autoExpandColumns(nextExpands, req);
     }
-
-    return data;
   }
 
   _getExpandObject(definitions, currentEntity, column) {
@@ -320,7 +338,7 @@ class Service extends cds.ApplicationService {
     return entity;
   }
 
-  _expand(data, res, expandObject) {
+  _expand(res, expandObject) {
     const columns = expandObject.expandColumns;
     let expands;
     if (columns.indexOf("*") === -1) {
@@ -358,9 +376,8 @@ class Service extends cds.ApplicationService {
       mExpands.set(keys, [expand]);
     }
 
-    for (let items of data) {
+    for (let items of expandObject.data) {
       if (!Array.isArray(items)) items = [items];
-      items = this._findItem(items, expandObject.path);
 
       if (!items) continue;
       for (const item of items) {
@@ -376,29 +393,6 @@ class Service extends cds.ApplicationService {
         item[expandObject.associationName] = mExpands.get(keys);
       }
     }
-  }
-
-  _findItem(items, path) {
-    if (path.length === 0) return items;
-
-    for (const [i, item] of items.entries()) {
-      if (!item[path[0]]) {
-        items.splice(i, 1);
-        continue;
-      }
-
-      if (Array.isArray(item[path[0]])) {
-        item[path[0]].forEach((item) => {
-          items.push(item);
-        });
-
-        items.splice(i, 1);
-      } else {
-        items[i] = item[path[0]];
-      }
-    }
-    items = this._findItem(items, path.slice(1));
-    return items;
   }
 }
 module.exports = Service;
